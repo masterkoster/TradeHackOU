@@ -3,6 +3,7 @@ import { PerformanceChart } from "@/components/performance-chart"
 import { TickerList } from "@/components/ticker-list"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
+import { AlpacaStatus } from "@/components/alpaca-status"
 
 export default function Dashboard() {
   return (
@@ -20,11 +21,7 @@ export default function Dashboard() {
             <PerformanceChart />
             <TickerList />
             
-            {/* Status Indicator */}
-            <div className="flex items-center justify-end gap-2 mt-4">
-              <div className="w-[13px] h-[13px] rounded-full bg-[#86efac]" />
-              <span className="text-sm text-[#919191]">Status</span>
-            </div>
+            <AlpacaStatus />
           </div>
         </main>
       </div>
