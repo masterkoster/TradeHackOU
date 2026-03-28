@@ -4,20 +4,32 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const symbol = searchParams.get('symbol')
   const feed = process.env.ALPACA_FEED ?? 'iex'
+  const apiKey = process.env.ALPACA_API_KEY
+  const apiSecret = process.env.ALPACA_SECRET_KEY
 
   if (!symbol) return NextResponse.json({ error: 'symbol required' }, { status: 400 })
+  if (!apiKey || !apiSecret) {
+    return NextResponse.json({ error: 'Missing Alpaca API credentials' }, { status: 500 })
+  }
 
   try {
     const res = await fetch(
       `https://data.alpaca.markets/v2/stocks/${encodeURIComponent(symbol)}/quotes/latest?feed=${feed}`,
       {
         headers: {
-          'APCA-API-KEY-ID': process.env.ALPACA_API_KEY ?? '',
-          'APCA-API-SECRET-KEY': process.env.ALPACA_SECRET_KEY ?? '',
+          'APCA-API-KEY-ID': apiKey,
+          'APCA-API-SECRET-KEY': apiSecret,
         },
         cache: 'no-store',
       }
     )
+    if (res.status === 429) {
+      return NextResponse.json({ error: 'Rate limited — try again shortly' }, { status: 429 })
+    }
+    if (!res.ok) {
+      const text = await res.text()
+      return NextResponse.json({ error: text || 'Alpaca error' }, { status: res.status })
+    }
     const data = await res.json()
     return NextResponse.json(data)
   } catch {
