@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
@@ -13,6 +14,7 @@ type AuthModalProps = {
 }
 
 export function AuthModal({ open, onOpenChange }: AuthModalProps) {
+  const router = useRouter()
   const [tab, setTab] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -28,6 +30,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       await signIn(email, password)
       onOpenChange(false)
+      router.push('/app')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Login failed.')
     } finally {
@@ -48,6 +51,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     try {
       await signUp(email, password, name)
       onOpenChange(false)
+      router.push('/app')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Registration failed.')
     } finally {
