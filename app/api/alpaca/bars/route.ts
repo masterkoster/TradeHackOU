@@ -8,6 +8,9 @@ export async function GET(req: NextRequest) {
   const feed = process.env.ALPACA_FEED ?? 'iex'
   const apiKey = process.env.ALPACA_API_KEY
   const apiSecret = process.env.ALPACA_SECRET_KEY
+  const end = new Date()
+  const start = new Date(end)
+  start.setDate(end.getDate() - 30)
 
   if (!symbol) return NextResponse.json({ error: 'symbol required' }, { status: 400 })
   if (!apiKey || !apiSecret) {
@@ -16,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const res = await fetch(
-      `https://data.alpaca.markets/v2/stocks/${encodeURIComponent(symbol)}/bars?timeframe=${timeframe}&limit=${limit}&feed=${feed}&adjustment=raw`,
+      `https://data.alpaca.markets/v2/stocks/${encodeURIComponent(symbol)}/bars?timeframe=${timeframe}&limit=${limit}&feed=${feed}&adjustment=raw&start=${start.toISOString()}&end=${end.toISOString()}`,
       {
         headers: {
           'APCA-API-KEY-ID': apiKey,
