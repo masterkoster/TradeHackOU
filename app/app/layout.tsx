@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 import { Sidebar } from '@/components/sidebar'
 import { RiskProfileProvider } from '@/contexts/RiskProfileContext'
+import { FavoritesProvider } from '@/contexts/FavoritesContext'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
@@ -54,13 +55,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!authed) return null
 
   return (
-    <RiskProfileProvider>
-      <div className="min-h-screen bg-black text-white flex">
-        <Sidebar />
-        <main className="flex-1 p-6 overflow-y-auto min-h-screen">
-          {children}
-        </main>
-      </div>
-    </RiskProfileProvider>
+    <FavoritesProvider>
+      <RiskProfileProvider>
+        <div className="min-h-screen bg-black text-white flex">
+          <Sidebar />
+          <main className="flex-1 p-6 overflow-y-auto min-h-screen">
+            {children}
+          </main>
+        </div>
+      </RiskProfileProvider>
+    </FavoritesProvider>
   )
 }

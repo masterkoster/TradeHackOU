@@ -1,169 +1,246 @@
 'use client'
 
-import { useState, useCallback, useMemo } from 'react'
-import { useBars } from '@/hooks/useBars'
+import { useState, useCallback, useMemo, useRef } from 'react'
 import { CompareChart, type StockSeries } from '@/components/compare-chart'
-import type { Timeframe } from '@/types'
+import { fetchBarsForPeriod } from '@/lib/alpacaClient'
+import { StarButton } from '@/components/star-button'
+import type { Bar, Timeframe } from '@/types'
 
-const STOCK_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#ef4444']
+// ─── Period config ────────────────────────────────────────────────────────────
 
-function fmt(val: number | undefined, decimals = 2) {
+const PERIODS = [
+  { key: '1D',  label: '1D',  days: 1,   timeframe: '5Min'  as Timeframe, limit: 100 },
+  { key: '1W',  label: '1W',  days: 7,   timeframe: '1Hour' as Timeframe, limit: 50  },
+  { key: '1M',  label: '1M',  days: 30,  timeframe: '1Day'  as Timeframe, limit: 23  },
+  { key: '3M',  label: '3M',  days: 90,  timeframe: '1Day'  as Timeframe, limit: 66  },
+  { key: '1Y',  label: '1Y',  days: 365, timeframe: '1Day'  as Timeframe, limit: 252 },
+]
+
+const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#ef4444', '#06b6d4']
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface Stock {
+  id: number
+  symbol: string
+  bars: Bar[]
+  loading: boolean
+  error: string | null
+  color: string
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function fmt(val: number | undefined, dec = 2) {
   if (val === undefined || isNaN(val)) return '—'
-  return val.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+  return val.toLocaleString(undefined, { minimumFractionDigits: dec, maximumFractionDigits: dec })
 }
 
 function pct(a: number, b: number) {
   if (!a || !b) return '—'
-  const change = ((b - a) / a) * 100
-  const sign = change >= 0 ? '+' : ''
-  return `${sign}${change.toFixed(2)}%`
-}
-
-function StockInput({
-  index,
-  color,
-  loading,
-  onLoad,
-}: {
-  index: number
-  color: string
-  loading: boolean
-  onLoad: (symbol: string, timeframe: Timeframe) => void
-}) {
-  const [input, setInput] = useState(index === 0 ? 'AAPL' : 'TSLA')
-  const [timeframe, setTimeframe] = useState<Timeframe>('1Day')
-
-  const handleLoad = useCallback(async () => {
-    const s = input.trim().toUpperCase()
-    if (!s) return
-    onLoad(s, timeframe)
-  }, [input, timeframe, onLoad])
-
-  const timeframes: Timeframe[] = ['1Day', '1Hour', '15Min', '5Min']
-
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="w-3 h-3 rounded-full shrink-0" style={{ background: color }} />
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value.toUpperCase())}
-        onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
-        placeholder="Symbol…"
-        className="w-24 px-2.5 py-1.5 rounded-lg bg-black border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/30"
-      />
-      <div className="flex gap-1">
-        {timeframes.map((tf) => (
-          <button
-            key={tf}
-            onClick={() => setTimeframe(tf)}
-            className={`px-2 py-1 rounded text-xs transition-colors ${
-              timeframe === tf ? 'text-white' : 'text-white/30 hover:text-white/60'
-            }`}
-            style={timeframe === tf ? { color } : {}}
-          >
-            {tf}
-          </button>
-        ))}
-      </div>
-      <button
-        onClick={handleLoad}
-        disabled={loading}
-        className="px-3 py-1.5 rounded-lg text-black text-xs font-medium disabled:opacity-50 transition-colors shrink-0"
-        style={{ background: color }}
-      >
-        {loading ? '…' : 'Load'}
-      </button>
-    </div>
-  )
-}
-
-function useStockState(defaultSymbol: string, color: string) {
-  const { bars, loading, load } = useBars()
-  const [symbol, setSymbol] = useState(defaultSymbol)
-
-  const handleLoad = useCallback(
-    async (s: string, tf: Timeframe) => {
-      setSymbol(s)
-      await load(s, tf)
-    },
-    [load]
-  )
-
-  return { symbol, bars, loading, color, handleLoad }
+  const c = ((b - a) / a) * 100
+  return `${c >= 0 ? '+' : ''}${c.toFixed(2)}%`
 }
 
 const TABLE_ROWS = [
-  { key: 'close', label: 'Last Close' },
-  { key: 'open', label: 'Open' },
-  { key: 'high', label: 'High (latest)' },
-  { key: 'low', label: 'Low (latest)' },
+  { key: 'close',  label: 'Last Close' },
+  { key: 'open',   label: 'Open' },
+  { key: 'high',   label: 'High' },
+  { key: 'low',    label: 'Low' },
   { key: 'volume', label: 'Volume' },
-  { key: 'change', label: 'Change %' },
+  { key: 'change', label: 'Period Change' },
+]
+
+function getCell(key: string, bars: Bar[]): string {
+  if (bars.length === 0) return '—'
+  const latest = bars[bars.length - 1]
+  const first  = bars[0]
+  switch (key) {
+    case 'close':  return `$${fmt(latest.close)}`
+    case 'open':   return `$${fmt(latest.open)}`
+    case 'high':   return `$${fmt(latest.high)}`
+    case 'low':    return `$${fmt(latest.low)}`
+    case 'volume': return fmt(latest.volume, 0)
+    case 'change': return pct(first.close, latest.close)
+    default:       return '—'
+  }
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+let nextId = 3
+const INITIAL: Stock[] = [
+  { id: 1, symbol: 'AAPL', bars: [], loading: false, error: null, color: COLORS[0] },
+  { id: 2, symbol: 'TSLA', bars: [], loading: false, error: null, color: COLORS[1] },
 ]
 
 export default function ComparePage() {
-  const stockA = useStockState('AAPL', STOCK_COLORS[0])
-  const stockB = useStockState('TSLA', STOCK_COLORS[1])
+  const [stocks, setStocks]       = useState<Stock[]>(INITIAL)
+  const [period, setPeriod]       = useState(PERIODS[2]) // default 1M
+  const [inputs, setInputs]       = useState<Record<number, string>>({ 1: 'AAPL', 2: 'TSLA' })
+  const loadingRef                = useRef<Set<number>>(new Set())
 
-  const stocks = [stockA, stockB]
+  // ── helpers ───────────────────────────────────────────────────────────────
+
+  const loadStock = useCallback(async (id: number, symbol: string, p = period) => {
+    const s = symbol.trim().toUpperCase()
+    if (!s) return
+    if (loadingRef.current.has(id)) return
+
+    loadingRef.current.add(id)
+    setStocks((prev) =>
+      prev.map((st) => (st.id === id ? { ...st, symbol: s, loading: true, error: null } : st))
+    )
+
+    const startIso = new Date(Date.now() - p.days * 24 * 60 * 60 * 1000).toISOString()
+    try {
+      const bars = await fetchBarsForPeriod(s, p.timeframe, startIso, p.limit)
+      setStocks((prev) =>
+        prev.map((st) => (st.id === id ? { ...st, bars, loading: false } : st))
+      )
+    } catch (err) {
+      setStocks((prev) =>
+        prev.map((st) =>
+          st.id === id ? { ...st, bars: [], loading: false, error: (err as Error).message } : st
+        )
+      )
+    } finally {
+      loadingRef.current.delete(id)
+    }
+  }, [period])
+
+  const changePeriod = useCallback((p: typeof PERIODS[number]) => {
+    setPeriod(p)
+    // reload all stocks that have a symbol — use functional read to get current list
+    setStocks((prev) => {
+      prev.forEach((st) => { if (st.symbol) loadStock(st.id, st.symbol, p) })
+      return prev
+    })
+  // loadStock is stable (no period dep in its closure when p is passed explicitly)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const addStock = useCallback(() => {
+    const id = nextId++
+    const color = COLORS[(stocks.length) % COLORS.length]
+    setStocks((prev) => [...prev, { id, symbol: '', bars: [], loading: false, error: null, color }])
+    setInputs((prev) => ({ ...prev, [id]: '' }))
+  }, [stocks.length])
+
+  const removeStock = useCallback((id: number) => {
+    setStocks((prev) => prev.filter((s) => s.id !== id))
+    setInputs((prev) => { const n = { ...prev }; delete n[id]; return n })
+  }, [])
+
+  // ── chart series ──────────────────────────────────────────────────────────
 
   const chartSeries: StockSeries[] = useMemo(
-    () =>
-      stocks.map((s) => ({ symbol: s.symbol, bars: s.bars, color: s.color })),
+    () => stocks.map((s) => ({ symbol: s.symbol, bars: s.bars, color: s.color })),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [stockA.bars, stockB.bars, stockA.symbol, stockB.symbol]
+    [stocks]
   )
 
   const hasData = stocks.some((s) => s.bars.length > 0)
 
-  function getRow(key: string, stock: typeof stockA) {
-    const { bars } = stock
-    if (bars.length === 0) return '—'
-    const latest = bars[bars.length - 1]
-    const first = bars[0]
-    switch (key) {
-      case 'close': return `$${fmt(latest.close)}`
-      case 'open': return `$${fmt(latest.open)}`
-      case 'high': return `$${fmt(latest.high)}`
-      case 'low': return `$${fmt(latest.low)}`
-      case 'volume': return fmt(latest.volume, 0)
-      case 'change': return pct(first.close, latest.close)
-      default: return '—'
-    }
-  }
+  // ── render ────────────────────────────────────────────────────────────────
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-white mb-4">Compare</h1>
+      <h1 className="text-lg font-semibold text-white mb-5">Compare</h1>
 
-      {/* Stock inputs */}
-      <div className="flex flex-col gap-3 mb-6">
-        {stocks.map((stock, i) => (
-          <StockInput
-            key={i}
-            index={i}
-            color={stock.color}
-            loading={stock.loading}
-            onLoad={stock.handleLoad}
-          />
+      {/* Stock rows */}
+      <div className="flex flex-col gap-2 mb-5">
+        {stocks.map((stock) => (
+          <div key={stock.id} className="flex items-center gap-2 flex-wrap">
+            {/* color swatch */}
+            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: stock.color }} />
+
+            {/* symbol input */}
+            <input
+              value={inputs[stock.id] ?? ''}
+              onChange={(e) =>
+                setInputs((prev) => ({ ...prev, [stock.id]: e.target.value.toUpperCase() }))
+              }
+              onKeyDown={(e) => e.key === 'Enter' && loadStock(stock.id, inputs[stock.id] ?? '')}
+              placeholder="Symbol…"
+              className="w-24 px-2.5 py-1.5 rounded-lg bg-black border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/20"
+            />
+
+            {/* load button */}
+            <button
+              onClick={() => loadStock(stock.id, inputs[stock.id] ?? '')}
+              disabled={stock.loading}
+              className="px-3 py-1.5 rounded-lg text-black text-xs font-medium disabled:opacity-50 transition-opacity shrink-0"
+              style={{ background: stock.color }}
+            >
+              {stock.loading ? '…' : 'Load'}
+            </button>
+
+            {/* symbol label + star + error */}
+            {stock.bars.length > 0 && (
+              <div className="flex items-center gap-1">
+                <span className="text-xs font-medium" style={{ color: stock.color }}>{stock.symbol}</span>
+                <StarButton symbol={stock.symbol} size={12} />
+              </div>
+            )}
+            {stock.error && (
+              <span className="text-xs text-red-400">{stock.error}</span>
+            )}
+
+            {/* remove — only if more than 1 row */}
+            {stocks.length > 1 && (
+              <button
+                onClick={() => removeStock(stock.id)}
+                className="ml-auto text-white/20 hover:text-white/50 transition-colors text-lg leading-none shrink-0"
+                aria-label="Remove"
+              >
+                ×
+              </button>
+            )}
+          </div>
+        ))}
+
+        {/* add stock */}
+        {stocks.length < COLORS.length && (
+          <button
+            onClick={addStock}
+            className="self-start mt-1 px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 text-xs transition-colors"
+          >
+            + Add stock
+          </button>
+        )}
+      </div>
+
+      {/* Period selector */}
+      <div className="flex gap-1 mb-4">
+        {PERIODS.map((p) => (
+          <button
+            key={p.key}
+            onClick={() => changePeriod(p)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              period.key === p.key
+                ? 'bg-white/10 text-white'
+                : 'text-white/30 hover:text-white/60'
+            }`}
+          >
+            {p.label}
+          </button>
         ))}
       </div>
 
       {/* Legend */}
       {hasData && (
-        <div className="flex gap-4 mb-3">
-          {stocks
-            .filter((s) => s.bars.length > 0)
-            .map((s) => (
-              <div key={s.symbol} className="flex items-center gap-1.5">
-                <span className="w-3 h-0.5 rounded-full" style={{ background: s.color }} />
-                <span className="text-xs text-white/60">{s.symbol}</span>
-              </div>
-            ))}
+        <div className="flex gap-4 mb-3 flex-wrap">
+          {stocks.filter((s) => s.bars.length > 0).map((s) => (
+            <div key={s.id} className="flex items-center gap-1.5">
+              <span className="w-4 h-0.5 rounded-full" style={{ background: s.color }} />
+              <span className="text-xs" style={{ color: s.color }}>{s.symbol}</span>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Unified chart */}
+      {/* Chart */}
       <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 p-4 mb-6">
         {hasData ? (
           <CompareChart series={chartSeries} />
@@ -183,11 +260,11 @@ export default function ComparePage() {
                 <th className="text-left px-4 py-3 text-white/40 font-normal">Metric</th>
                 {stocks.map((s) => (
                   <th
-                    key={s.symbol}
+                    key={s.id}
                     className="text-right px-4 py-3 font-semibold"
                     style={{ color: s.color }}
                   >
-                    {s.symbol}
+                    {s.symbol || '—'}
                   </th>
                 ))}
               </tr>
@@ -196,12 +273,12 @@ export default function ComparePage() {
               {TABLE_ROWS.map((row, i) => (
                 <tr
                   key={row.key}
-                  className={`border-b border-white/5 ${i % 2 === 0 ? '' : 'bg-white/[0.02]'}`}
+                  className={`border-b border-white/5 ${i % 2 !== 0 ? 'bg-white/[0.02]' : ''}`}
                 >
                   <td className="px-4 py-3 text-white/50">{row.label}</td>
                   {stocks.map((s) => (
-                    <td key={s.symbol} className="px-4 py-3 text-right text-white">
-                      {getRow(row.key, s)}
+                    <td key={s.id} className="px-4 py-3 text-right text-white tabular-nums">
+                      {getCell(row.key, s.bars)}
                     </td>
                   ))}
                 </tr>

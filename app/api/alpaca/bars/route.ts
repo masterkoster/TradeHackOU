@@ -9,8 +9,8 @@ export async function GET(req: NextRequest) {
   const apiKey = process.env.ALPACA_API_KEY
   const apiSecret = process.env.ALPACA_SECRET_KEY
   const end = new Date()
-  const start = new Date(end)
-  start.setDate(end.getDate() - 30)
+  const startParam = searchParams.get('start')
+  const start = startParam ? new Date(startParam) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000)
 
   if (!symbol) return NextResponse.json({ error: 'symbol required' }, { status: 400 })
   if (!apiKey || !apiSecret) {

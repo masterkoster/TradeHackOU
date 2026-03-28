@@ -20,7 +20,6 @@ export function CompareChart({ series }: CompareChartProps) {
   const chartRef = useRef<IChartApi | null>(null)
   const linesRef = useRef<ISeriesApi<'Line'>[]>([])
 
-  // Create chart once
   useEffect(() => {
     if (!containerRef.current) return
 
@@ -34,10 +33,20 @@ export function CompareChart({ series }: CompareChartProps) {
         horzLines: { color: '#1f2028' },
       },
       crosshair: { mode: 1 },
-      rightPriceScale: { borderColor: '#2e303a' },
+      rightPriceScale: {
+        borderColor: '#2e303a',
+        // format as percent change e.g. +4.20%
+        scaleMargins: { top: 0.1, bottom: 0.1 },
+      },
       timeScale: { borderColor: '#2e303a', timeVisible: true, secondsVisible: false },
       width: containerRef.current.clientWidth,
       height: 360,
+      localization: {
+        priceFormatter: (p: number) => {
+          const sign = p >= 0 ? '+' : ''
+          return `${sign}${p.toFixed(2)}%`
+        },
+      },
     })
     chartRef.current = chart
 
@@ -54,21 +63,29 @@ export function CompareChart({ series }: CompareChartProps) {
     }
   }, [])
 
-  // Rebuild series when data changes
   useEffect(() => {
     const chart = chartRef.current
     if (!chart) return
 
-    // Remove old series
     linesRef.current.forEach((s) => chart.removeSeries(s))
     linesRef.current = []
 
-    const activeSeries = series.filter((s) => s.bars.length > 0)
-    if (activeSeries.length === 0) return
+    const active = series.filter((s) => s.bars.length > 0)
+    if (active.length === 0) return
 
-    activeSeries.forEach(({ bars, color }) => {
-      const line = chart.addLineSeries({ color, lineWidth: 2 })
-      line.setData(bars.map((b) => ({ time: b.time as UTCTimestamp, value: b.close })))
+    active.forEach(({ bars, color }) => {
+      const base = bars[0].close
+      const line = chart.addLineSeries({
+        color,
+        lineWidth: 2,
+        priceFormat: { type: 'custom', formatter: (p: number) => `${p >= 0 ? '+' : ''}${p.toFixed(2)}%` },
+      })
+      line.setData(
+        bars.map((b) => ({
+          time: b.time as UTCTimestamp,
+          value: ((b.close - base) / base) * 100,
+        }))
+      )
       linesRef.current.push(line)
     })
 

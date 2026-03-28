@@ -44,6 +44,22 @@ export async function fetchBars(
   return { bars, fromCache: false }
 }
 
+export async function fetchBarsForPeriod(
+  symbol: string,
+  timeframe: Timeframe,
+  startIso: string,
+  limit: number
+): Promise<Bar[]> {
+  const res = await fetch(
+    `/api/alpaca/bars?symbol=${encodeURIComponent(symbol)}&timeframe=${TIMEFRAME_API[timeframe]}&limit=${limit}&start=${encodeURIComponent(startIso)}`,
+    { cache: 'no-store' }
+  )
+  if (res.status === 429) throw new Error('Rate limited — try again shortly')
+  if (!res.ok) throw new Error('Failed to fetch bars')
+  const data = await res.json()
+  return rawToBars(data.bars ?? [])
+}
+
 export async function fetchLatestQuote(symbol: string): Promise<unknown> {
   const res = await fetch(`/api/alpaca/quote?symbol=${encodeURIComponent(symbol)}`)
   if (!res.ok) throw new Error('Failed to fetch quote')

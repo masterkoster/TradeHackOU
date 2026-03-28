@@ -15,6 +15,7 @@ import { StaleBanner } from './stale-banner'
 import { WSStatusDot } from './ws-status-dot'
 import { RiskProfileBadge } from './risk-profile'
 import { HistoricAnalysis } from './historic-analysis'
+import { StarButton } from './star-button'
 
 interface NewsArticleRaw {
   headline: string
@@ -174,10 +175,13 @@ export function TradingDashboard() {
       {/* Chart */}
       <div className="p-4 bg-[#0D0D0D] rounded-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-medium text-white">
-            {symbol}
-            <span className="ml-2 text-sm text-gray-400">{timeframe}</span>
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-medium text-white">
+              {symbol}
+              <span className="ml-2 text-sm text-gray-400">{timeframe}</span>
+            </h2>
+            <StarButton symbol={symbol} size={16} />
+          </div>
           {loading && <span className="text-xs text-gray-500 animate-pulse">Loading…</span>}
         </div>
         {allBars.length > 0 ? (

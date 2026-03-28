@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
+import { StarButton } from '@/components/star-button'
 
 const COMPANY_NAMES: Record<string, string> = {
   // Technology
@@ -109,7 +110,10 @@ function StockCard({ data, size = 'normal' }: { data: StockData; size?: 'normal'
     return (
       <div className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-base font-bold text-white">{data.symbol}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="text-base font-bold text-white">{data.symbol}</p>
+            <StarButton symbol={data.symbol} size={13} />
+          </div>
           <p className="text-xs text-white/40 truncate">{COMPANY_NAMES[data.symbol] ?? data.symbol}</p>
         </div>
         <div className="text-right shrink-0">
@@ -126,7 +130,10 @@ function StockCard({ data, size = 'normal' }: { data: StockData; size?: 'normal'
     <div className="p-3 rounded-xl bg-[#0D0D0D] border border-white/10">
       <div className="flex items-start justify-between mb-2">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-white">{data.symbol}</p>
+          <div className="flex items-center gap-1">
+            <p className="text-sm font-bold text-white">{data.symbol}</p>
+            <StarButton symbol={data.symbol} size={12} />
+          </div>
           <p className="text-xs text-white/40 truncate">{COMPANY_NAMES[data.symbol] ?? data.symbol}</p>
         </div>
         <span
