@@ -77,8 +77,10 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-black text-white p-6">
-      <h1 className="text-lg font-semibold text-white mb-6">Dashboard</h1>
-      <TradingDashboard />
+      <section id="dashboard" className="scroll-mt-24">
+        <h1 className="text-lg font-semibold text-white mb-6">Dashboard</h1>
+        <TradingDashboard />
+      </section>
     </div>
   )
 }
