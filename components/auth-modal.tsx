@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { signIn, signUp } from '@/lib/auth'
+import { supabase } from '@/lib/supabaseClient'
 
 type AuthModalProps = {
   open: boolean
@@ -28,11 +28,16 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setBusy(true)
 
     try {
-      await signIn(email, password)
-      onOpenChange(false)
-      router.push('/app')
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Login failed.')
+      const { error } = await supabase().auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (!error) {
+        onOpenChange(false)
+        router.push('/app')
+        return
+      }
+      setMessage(error.message)
     } finally {
       setBusy(false)
     }
@@ -49,11 +54,19 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setBusy(true)
 
     try {
-      await signUp(email, password, name)
-      onOpenChange(false)
-      router.push('/app')
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Registration failed.')
+      const { error } = await supabase().auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+        },
+      })
+      if (!error) {
+        onOpenChange(false)
+        router.push('/app')
+        return
+      }
+      setMessage(error.message)
     } finally {
       setBusy(false)
     }
