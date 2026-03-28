@@ -14,7 +14,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let active = true
 
-    supabase().auth.getUser().then(({ data }) => {
+    if (!supabase) {
+      router.replace('/')
+      setLoading(false)
+      return
+    }
+
+    supabase.auth.getUser().then(({ data }) => {
       if (!active) return
       if (data.user) {
         setAuthed(true)
@@ -24,7 +30,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       setLoading(false)
     })
 
-    const { data: authListener } = supabase().auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) return
       if (!session) {
         router.replace('/')
