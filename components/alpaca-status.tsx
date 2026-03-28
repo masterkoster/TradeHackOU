@@ -61,9 +61,9 @@ export function AlpacaStatus() {
         : 'bg-[#facc15]'
 
   return (
-    <div className="flex items-center justify-end gap-2 mt-4">
-      <div className={`w-[13px] h-[13px] rounded-full ${dotColor}`} />
-      <span className="text-sm text-[#919191]">Alpaca: {status.message}</span>
+    <div className="flex items-center gap-2">
+      <div className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
+      <span className="text-sm text-black/60">Alpaca: {status.message}</span>
     </div>
   )
 }
