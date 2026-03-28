@@ -22,17 +22,17 @@ export function DashboardMetrics() {
   return (
     <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
       {metrics.map((metric) => (
-        <Card key={metric.label} className="bg-white border-black/10 shadow-sm">
+        <Card key={metric.label} className="bg-white dark:bg-white/5 border-black/10 dark:border-white/10 shadow-sm">
           <CardHeader>
-            <CardTitle className="text-xs font-semibold uppercase tracking-[0.2em] text-black/50">
+            <CardTitle className="text-xs font-semibold uppercase tracking-[0.2em] text-black/50 dark:text-white/50">
               {metric.label}
             </CardTitle>
-            <CardDescription className="text-3xl font-semibold text-black">
+            <CardDescription className="text-3xl font-semibold text-black dark:text-white">
               {metric.value}
             </CardDescription>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-xs text-black/50">{metric.subtext}</p>
+            <p className="text-xs text-black/50 dark:text-white/50">{metric.subtext}</p>
           </CardContent>
         </Card>
       ))}

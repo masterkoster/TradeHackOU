@@ -17,9 +17,9 @@ export function PerformanceChart() {
   return (
     <section className="grid gap-4 md:grid-cols-3">
       {features.map((feature) => (
-        <div key={feature.title} className="rounded-xl border border-black/10 bg-white p-5 shadow-sm">
-          <h3 className="text-base font-semibold text-black">{feature.title}</h3>
-          <p className="mt-2 text-sm text-black/60">{feature.detail}</p>
+        <div key={feature.title} className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 p-5 shadow-sm">
+          <h3 className="text-base font-semibold text-black dark:text-white">{feature.title}</h3>
+          <p className="mt-2 text-sm text-black/60 dark:text-white/60">{feature.detail}</p>
         </div>
       ))}
     </section>

@@ -63,7 +63,7 @@ export function AlpacaStatus() {
   return (
     <div className="flex items-center gap-2">
       <div className={`h-2.5 w-2.5 rounded-full ${dotColor}`} />
-      <span className="text-sm text-black/60">Alpaca: {status.message}</span>
+      <span className="text-sm text-black/60 dark:text-white/60">Alpaca: {status.message}</span>
     </div>
   )
 }
