@@ -1,5 +1,4 @@
 import { DashboardMetrics } from '@/components/dashboard-metrics'
-import { TradingDashboard } from '@/components/trading-dashboard'
 import { TickerList } from '@/components/ticker-list'
 import { Header } from '@/components/header'
 import { AlpacaStatus } from '@/components/alpaca-status'
@@ -44,7 +43,6 @@ export default function Home() {
         </section>
 
         <DashboardMetrics />
-        <TradingDashboard />
         <TickerList />
       </main>
     </div>
