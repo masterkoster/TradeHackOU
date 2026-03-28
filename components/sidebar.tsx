@@ -2,13 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, BarChart2, ArrowLeftRight, Shield, LogOut } from 'lucide-react'
+import { LayoutDashboard, BarChart2, ArrowLeftRight, Shield, LogOut, Compass } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { FinbroLogo } from './finbro-logo'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/app', icon: LayoutDashboard },
   { label: 'Analytics', href: '/app/analytics', icon: BarChart2 },
+  { label: 'Explore', href: '/app/explore', icon: Compass },
   { label: 'Compare', href: '/app/compare', icon: ArrowLeftRight },
   { label: 'Risk Profile', href: '/app/risk-profile', icon: Shield },
 ]
