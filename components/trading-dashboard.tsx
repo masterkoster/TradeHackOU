@@ -20,6 +20,10 @@ interface NewsArticleRaw {
   headline: string
 }
 
+interface MarketClock {
+  is_open: boolean
+}
+
 export function TradingDashboard() {
   const [symbol, setSymbol] = useState('AAPL')
   const [pendingSymbol, setPendingSymbol] = useState('AAPL')
@@ -28,8 +32,9 @@ export function TradingDashboard() {
   const { riskProfile, setRiskProfile } = useRiskProfile()
   const [signal, setSignal] = useState<Signal>(null)
   const [liveBars, setLiveBars] = useState<Bar[]>([])
+  const [marketOpen, setMarketOpen] = useState<boolean | null>(null)
 
-  const { bars, loading, error, stale, load } = useBars()
+  const { bars, loading, error, stale, load, refresh } = useBars()
   const { analysis, status: groqStatus, error: groqError, run: runGroq, reset: resetGroq } = useGroqAnalysis()
 
   const handleNewBar = useCallback((bar: Bar) => {
@@ -40,12 +45,26 @@ export function TradingDashboard() {
   }, [])
 
   const { status: wsStatus, connect: wsConnect, disconnect: wsDisconnect } = useWebSocket(handleNewBar)
+  const lastRequestRef = useRef<{ symbol: string; timeframe: Timeframe } | null>(null)
 
   const allBars = liveBars.length > 0
     ? [...bars.filter((b) => !liveBars.find((lb) => lb.time === b.time)), ...liveBars].sort(
         (a, b) => a.time - b.time
       )
     : bars
+
+  const fetchMarketStatus = useCallback(async () => {
+    try {
+      const res = await fetch('/api/alpaca/clock')
+      if (!res.ok) return
+      const data = (await res.json()) as MarketClock
+      if (typeof data.is_open === 'boolean') {
+        setMarketOpen(data.is_open)
+      }
+    } catch {
+      // ignore market status errors
+    }
+  }, [])
 
   const handleLoad = useCallback(async () => {
     const sym = pendingSymbol.trim().toUpperCase()
@@ -55,6 +74,8 @@ export function TradingDashboard() {
     setSignal(null)
     resetGroq()
     await load(sym, timeframe)
+    lastRequestRef.current = { symbol: sym, timeframe }
+    fetchMarketStatus()
 
     // Fetch news for sentiment
     try {
@@ -73,7 +94,7 @@ export function TradingDashboard() {
 
     wsDisconnect()
     wsConnect(sym)
-  }, [pendingSymbol, timeframe, riskProfile, load, resetGroq, wsConnect, wsDisconnect])
+  }, [pendingSymbol, timeframe, riskProfile, load, resetGroq, wsConnect, wsDisconnect, fetchMarketStatus])
 
   const handleRunGroq = useCallback(async () => {
     if (allBars.length === 0) return
@@ -92,7 +113,25 @@ export function TradingDashboard() {
     if (didMount.current) return
     didMount.current = true
     load('AAPL', '1Day')
-  }, [load])
+    lastRequestRef.current = { symbol: 'AAPL', timeframe: '1Day' }
+    fetchMarketStatus()
+  }, [load, fetchMarketStatus])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const last = lastRequestRef.current
+      if (!last) return
+      refresh(last.symbol, last.timeframe)
+    }, 60_000)
+
+    return () => clearInterval(id)
+  }, [refresh])
+
+  useEffect(() => {
+    fetchMarketStatus()
+    const id = setInterval(fetchMarketStatus, 60_000)
+    return () => clearInterval(id)
+  }, [fetchMarketStatus])
 
   return (
     <div className="flex flex-col gap-4">
@@ -114,7 +153,7 @@ export function TradingDashboard() {
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-4">
           <WSStatusDot status={wsStatus} />
-          <RiskProfileBadge signal={signal} riskProfile={riskProfile} />
+          <RiskProfileBadge signal={signal} riskProfile={riskProfile} marketOpen={marketOpen ?? false} />
         </div>
         {stale && <StaleBanner show />}
       </div>
