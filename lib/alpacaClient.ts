@@ -25,13 +25,15 @@ function rawToBars(raw: Array<{ t: string; o: number; h: number; l: number; c: n
 export async function fetchBars(
   symbol: string,
   timeframe: Timeframe,
-  limit = 200
+  limit = 200,
+  force = false
 ): Promise<{ bars: Bar[]; fromCache: boolean }> {
   const cached = getCached(symbol, timeframe)
-  if (cached) return { bars: cached.bars, fromCache: true }
+  if (cached && !force) return { bars: cached.bars, fromCache: true }
 
   const res = await fetch(
-    `/api/alpaca/bars?symbol=${encodeURIComponent(symbol)}&timeframe=${TIMEFRAME_API[timeframe]}&limit=${limit}`
+    `/api/alpaca/bars?symbol=${encodeURIComponent(symbol)}&timeframe=${TIMEFRAME_API[timeframe]}&limit=${limit}`,
+    { cache: 'no-store' }
   )
   if (res.status === 429) throw new Error('Rate limited — try again shortly')
   if (!res.ok) throw new Error('Failed to fetch bars')
