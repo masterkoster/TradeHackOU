@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Bar, ChartType, RiskProfile, Signal, Timeframe } from '@/types'
+import type { Bar, ChartType, Signal, Timeframe } from '@/types'
+import { useRiskProfile } from '@/contexts/RiskProfileContext'
 import { useBars } from '@/hooks/useBars'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { useGroqAnalysis } from '@/hooks/useGroqAnalysis'
@@ -24,7 +25,7 @@ export function TradingDashboard() {
   const [pendingSymbol, setPendingSymbol] = useState('AAPL')
   const [timeframe, setTimeframe] = useState<Timeframe>('1Day')
   const [chartType, setChartType] = useState<ChartType>('candlestick')
-  const [riskProfile, setRiskProfile] = useState<RiskProfile>('moderate')
+  const { riskProfile, setRiskProfile } = useRiskProfile()
   const [signal, setSignal] = useState<Signal>(null)
   const [liveBars, setLiveBars] = useState<Bar[]>([])
 

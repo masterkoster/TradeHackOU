@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import { Button } from '@/components/ui/button'
+import { TradingDashboard } from '@/components/trading-dashboard'
 
 type UserState = {
   email?: string
   name?: string
 }
 
-export default function AppPage() {
+export default function DashboardPage() {
   const [user, setUser] = useState<UserState | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -59,13 +59,6 @@ export default function AppPage() {
     }
   }, [])
 
-  const handleSignOut = async () => {
-    if (supabase) {
-      await supabase.auth.signOut()
-    }
-    setUser(null)
-  }
-
   if (loading) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -83,11 +76,9 @@ export default function AppPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center gap-4">
-      <p className="text-sm text-white/70">
-        Welcome, {user.name ?? user.email}.
-      </p>
-      <Button onClick={handleSignOut}>Sign out</Button>
+    <div className="min-h-screen bg-black text-white p-6">
+      <h1 className="text-lg font-semibold text-white mb-6">Dashboard</h1>
+      <TradingDashboard />
     </div>
   )
 }
