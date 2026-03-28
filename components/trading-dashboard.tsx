@@ -22,6 +22,9 @@ interface NewsArticleRaw {
 
 interface MarketClock {
   is_open: boolean
+  next_open: string
+  next_close: string
+  timestamp: string
 }
 
 export function TradingDashboard() {
@@ -33,6 +36,7 @@ export function TradingDashboard() {
   const [signal, setSignal] = useState<Signal>(null)
   const [liveBars, setLiveBars] = useState<Bar[]>([])
   const [marketOpen, setMarketOpen] = useState<boolean | null>(null)
+  const [marketLabel, setMarketLabel] = useState<string>('Closed')
 
   const { bars, loading, error, stale, load, refresh } = useBars()
   const { analysis, status: groqStatus, error: groqError, run: runGroq, reset: resetGroq } = useGroqAnalysis()
@@ -61,6 +65,21 @@ export function TradingDashboard() {
       if (typeof data.is_open === 'boolean') {
         setMarketOpen(data.is_open)
       }
+
+      const now = new Date(data.timestamp)
+      const next = new Date(data.is_open ? data.next_close : data.next_open)
+      const diffMs = Math.max(0, next.getTime() - now.getTime())
+      const totalMinutes = Math.floor(diffMs / 60000)
+      const days = Math.floor(totalMinutes / 1440)
+      const hours = Math.floor((totalMinutes % 1440) / 60)
+      const minutes = totalMinutes % 60
+
+      const parts: string[] = []
+      if (days > 0) parts.push(`${days}d`)
+      if (hours > 0 || days > 0) parts.push(`${hours}h`)
+      parts.push(`${minutes}m`)
+
+      setMarketLabel(data.is_open ? `Open · closes in ${parts.join(' ')}` : `Closed · opens in ${parts.join(' ')}`)
     } catch {
       // ignore market status errors
     }
@@ -94,6 +113,8 @@ export function TradingDashboard() {
 
     wsDisconnect()
     wsConnect(sym)
+    wsDisconnect()
+    wsConnect(sym)
   }, [pendingSymbol, timeframe, riskProfile, load, resetGroq, wsConnect, wsDisconnect, fetchMarketStatus])
 
   const handleRunGroq = useCallback(async () => {
@@ -115,7 +136,18 @@ export function TradingDashboard() {
     load('AAPL', '1Day')
     lastRequestRef.current = { symbol: 'AAPL', timeframe: '1Day' }
     fetchMarketStatus()
+    wsConnect('AAPL')
   }, [load, fetchMarketStatus])
+
+  useEffect(() => {
+    if (!lastRequestRef.current) return
+    const { symbol: activeSymbol } = lastRequestRef.current
+    setLiveBars([])
+    load(activeSymbol, timeframe)
+    lastRequestRef.current = { symbol: activeSymbol, timeframe }
+    wsDisconnect()
+    wsConnect(activeSymbol)
+  }, [timeframe, load, wsConnect, wsDisconnect])
 
   useEffect(() => {
     const id = setInterval(() => {
@@ -153,7 +185,12 @@ export function TradingDashboard() {
       <div className="flex items-center justify-between px-1">
         <div className="flex items-center gap-4">
           <WSStatusDot status={wsStatus} />
-          <RiskProfileBadge signal={signal} riskProfile={riskProfile} marketOpen={marketOpen ?? false} />
+          <RiskProfileBadge
+            signal={signal}
+            riskProfile={riskProfile}
+            marketOpen={marketOpen ?? false}
+            marketLabel={marketLabel}
+          />
         </div>
         {stale && <StaleBanner show />}
       </div>

@@ -102,8 +102,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="login" className="mt-4">
             <div className="space-y-3">
-              <Input placeholder="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-              <Input placeholder="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <Input placeholder="Email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+              <Input placeholder="Password" type="password" autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} />
               {message && <p className="text-sm text-destructive">{message}</p>}
               <Button className="w-full" onClick={handleLogin} disabled={busy}>
                 {busy ? 'Working...' : 'Continue'}
@@ -113,12 +113,13 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
           <TabsContent value="register" className="mt-4">
             <div className="space-y-3">
-              <Input placeholder="Name" type="text" value={name} onChange={(event) => setName(event.target.value)} />
-              <Input placeholder="Email" type="email" value={email} onChange={(event) => setEmail(event.target.value)} />
-              <Input placeholder="Password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} />
+              <Input placeholder="Name" type="text" autoComplete="name" value={name} onChange={(event) => setName(event.target.value)} />
+              <Input placeholder="Email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} />
+              <Input placeholder="Password" type="password" autoComplete="new-password" value={password} onChange={(event) => setPassword(event.target.value)} />
               <Input
                 placeholder="Confirm password"
                 type="password"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={(event) => setConfirmPassword(event.target.value)}
               />
