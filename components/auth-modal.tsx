@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setBusy(true)
 
     try {
-      const { error } = await supabase().auth.signInWithPassword({
+      if (!supabase) {
+        setMessage('Missing Supabase configuration.')
+        return
+      }
+      const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
@@ -54,7 +58,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
     setBusy(true)
 
     try {
-      const { error } = await supabase().auth.signUp({
+      if (!supabase) {
+        setMessage('Missing Supabase configuration.')
+        return
+      }
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -77,9 +85,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       <DialogContent className="max-w-md bg-card text-foreground border-border">
         <DialogHeader className="text-left">
           <DialogTitle className="text-xl">Welcome back</DialogTitle>
-          <p className="text-sm text-muted-foreground">
+          <DialogDescription>
             Sign in to access your trading workspace.
-          </p>
+          </DialogDescription>
         </DialogHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="mt-2">

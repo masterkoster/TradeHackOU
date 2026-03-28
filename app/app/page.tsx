@@ -16,7 +16,13 @@ export default function AppPage() {
   useEffect(() => {
     let active = true
 
-    supabase().auth.getUser().then(({ data }) => {
+    if (!supabase) {
+      setUser(null)
+      setLoading(false)
+      return
+    }
+
+    supabase.auth.getUser().then(({ data }) => {
       if (!active) {
         return
       }
@@ -32,7 +38,7 @@ export default function AppPage() {
       setLoading(false)
     })
 
-    const { data: authListener } = supabase().auth.onAuthStateChange((_event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!active) {
         return
       }
@@ -54,7 +60,9 @@ export default function AppPage() {
   }, [])
 
   const handleSignOut = async () => {
-    await supabase().auth.signOut()
+    if (supabase) {
+      await supabase.auth.signOut()
+    }
     setUser(null)
   }
 
