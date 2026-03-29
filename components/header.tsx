@@ -62,10 +62,17 @@ export function Header() {
           </div>
         ) : (
           <>
-            <Button variant="ghost" className="text-black dark:text-white text-[15px]" onClick={() => setOpen(true)}>
+            <Button
+              variant="ghost"
+              className="text-black dark:text-white text-[15px] whitespace-nowrap"
+              onClick={() => setOpen(true)}
+            >
               Login
             </Button>
-            <Button className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black text-[15px]" onClick={() => setOpen(true)}>
+            <Button
+              className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black text-[15px] whitespace-nowrap"
+              onClick={() => setOpen(true)}
+            >
               Open Account
             </Button>
           </>
