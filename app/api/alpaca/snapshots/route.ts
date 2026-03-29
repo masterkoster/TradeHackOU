@@ -2,24 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
-  const symbol = searchParams.get('symbol')
-  const timeframe = searchParams.get('timeframe') ?? '1Day'
-  const limit = searchParams.get('limit') ?? '200'
+  const symbols = searchParams.get('symbols')
   const feed = process.env.ALPACA_FEED ?? 'iex'
   const apiKey = process.env.ALPACA_API_KEY
   const apiSecret = process.env.ALPACA_SECRET_KEY
-  const end = new Date()
-  const startParam = searchParams.get('start')
-  const start = startParam ? new Date(startParam) : new Date(end.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-  if (!symbol) return NextResponse.json({ error: 'symbol required' }, { status: 400 })
+  if (!symbols) return NextResponse.json({ error: 'symbols required' }, { status: 400 })
   if (!apiKey || !apiSecret) {
     return NextResponse.json({ error: 'Missing Alpaca API credentials' }, { status: 500 })
   }
 
   try {
     const res = await fetch(
-      `https://data.alpaca.markets/v2/stocks/${encodeURIComponent(symbol)}/bars?timeframe=${timeframe}&limit=${limit}&feed=${feed}&adjustment=raw&start=${start.toISOString()}&end=${end.toISOString()}`,
+      `https://data.alpaca.markets/v2/stocks/snapshots?symbols=${encodeURIComponent(symbols)}&feed=${feed}`,
       {
         headers: {
           'APCA-API-KEY-ID': apiKey,
@@ -38,6 +33,6 @@ export async function GET(req: NextRequest) {
     const data = await res.json()
     return NextResponse.json(data)
   } catch {
-    return NextResponse.json({ error: 'Failed to fetch bars' }, { status: 500 })
+    return NextResponse.json({ error: 'Failed to fetch snapshots' }, { status: 500 })
   }
 }
