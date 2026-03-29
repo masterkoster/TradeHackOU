@@ -3,7 +3,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { TradingViewMarketOverview, TradingViewSymbolOverview } from '@/components/tradingview-widgets'
 import { StarButton } from '@/components/star-button'
 
 const COMPANY_NAMES: Record<string, string> = {
@@ -329,11 +328,6 @@ export default function ExplorePage() {
         </div>
       )}
 
-      <section className="rounded-2xl border border-white/10 bg-[#0D0D0D] p-4">
-        <p className="text-xs text-white/40 uppercase tracking-wide mb-4">Market Overview</p>
-        <TradingViewMarketOverview />
-      </section>
-
       {/* Today's Movers */}
       <section>
         <p className="text-xs text-white/40 uppercase tracking-wide mb-4">Today&apos;s Movers</p>
@@ -507,10 +501,6 @@ export default function ExplorePage() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-white/10 bg-black/30 p-3">
-                <p className="text-xs text-white/40 uppercase tracking-wide mb-3">Chart</p>
-                <TradingViewSymbolOverview symbol={selected.symbol} />
-              </div>
             </div>
           )}
         </DialogContent>
