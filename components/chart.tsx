@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTheme } from 'next-themes'
 import type { IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts'
 import { ColorType, createChart } from 'lightweight-charts'
 import type { Bar, ChartType } from '@/types'
@@ -11,28 +12,41 @@ interface ChartProps {
   chartType: ChartType
 }
 
+function getChartColors(isDark: boolean) {
+  return {
+    background: isDark ? '#0D0D0D' : '#ffffff',
+    textColor: isDark ? '#9ca3af' : '#374151',
+    gridColor: isDark ? '#1f2028' : '#e5e7eb',
+    borderColor: isDark ? '#2e303a' : '#d1d5db',
+  }
+}
+
 export function Chart({ bars, chartType }: ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const mainSeriesRef = useRef<ISeriesApi<'Candlestick' | 'Line' | 'Area' | 'Bar'> | null>(null)
   const volumeRef = useRef<ISeriesApi<'Histogram'> | null>(null)
+  const { resolvedTheme } = useTheme()
 
   // Create chart once on mount
   useEffect(() => {
     if (!containerRef.current) return
 
+    const isDark = document.documentElement.classList.contains('dark')
+    const colors = getChartColors(isDark)
+
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: '#0D0D0D' },
-        textColor: '#9ca3af',
+        background: { type: ColorType.Solid, color: colors.background },
+        textColor: colors.textColor,
       },
       grid: {
-        vertLines: { color: '#1f2028' },
-        horzLines: { color: '#1f2028' },
+        vertLines: { color: colors.gridColor },
+        horzLines: { color: colors.gridColor },
       },
       crosshair: { mode: 1 },
-      rightPriceScale: { borderColor: '#2e303a' },
-      timeScale: { borderColor: '#2e303a', timeVisible: true, secondsVisible: false },
+      rightPriceScale: { borderColor: colors.borderColor },
+      timeScale: { borderColor: colors.borderColor, timeVisible: true, secondsVisible: false },
       width: containerRef.current.clientWidth,
       height: 400,
     })
@@ -60,6 +74,25 @@ export function Chart({ bars, chartType }: ChartProps) {
       volumeRef.current = null
     }
   }, [])
+
+  // Update chart colors when theme changes
+  useEffect(() => {
+    if (!chartRef.current) return
+    const isDark = resolvedTheme === 'dark'
+    const colors = getChartColors(isDark)
+    chartRef.current.applyOptions({
+      layout: {
+        background: { type: ColorType.Solid, color: colors.background },
+        textColor: colors.textColor,
+      },
+      grid: {
+        vertLines: { color: colors.gridColor },
+        horzLines: { color: colors.gridColor },
+      },
+      rightPriceScale: { borderColor: colors.borderColor },
+      timeScale: { borderColor: colors.borderColor, timeVisible: true, secondsVisible: false },
+    })
+  }, [resolvedTheme])
 
   // Recreate main series when bars or chartType changes
   useEffect(() => {

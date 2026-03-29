@@ -210,21 +210,21 @@ export function TradingDashboard() {
       )}
 
       {/* Chart */}
-      <div className="p-4 bg-[#0D0D0D] rounded-2xl">
+      <div className="p-4 bg-card rounded-2xl border border-border">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-medium text-white">
+            <h2 className="text-base font-medium text-foreground">
               {symbol}
-              <span className="ml-2 text-sm text-gray-400">{timeframe}</span>
+              <span className="ml-2 text-sm text-muted-foreground">{timeframe}</span>
             </h2>
             <StarButton symbol={symbol} size={16} />
           </div>
-          {loading && <span className="text-xs text-gray-500 animate-pulse">Loading…</span>}
+          {loading && <span className="text-xs text-muted-foreground animate-pulse">Loading…</span>}
         </div>
         {allBars.length > 0 ? (
           <Chart bars={allBars} chartType={chartType} />
         ) : !loading ? (
-          <div className="h-[400px] flex items-center justify-center text-gray-500 text-sm">
+          <div className="h-[400px] flex items-center justify-center text-muted-foreground text-sm">
             Enter a symbol and click Load
           </div>
         ) : (

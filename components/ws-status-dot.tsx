@@ -22,7 +22,7 @@ export function WSStatusDot({ status }: WSStatusDotProps) {
   return (
     <div className="flex items-center gap-1.5">
       <span className={`w-2 h-2 rounded-full shrink-0 ${COLORS[status]}`} />
-      <span className="text-xs text-gray-400">{LABELS[status]}</span>
+      <span className="text-xs text-muted-foreground">{LABELS[status]}</span>
     </div>
   )
 }

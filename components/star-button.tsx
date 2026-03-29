@@ -21,7 +21,7 @@ export function StarButton({ symbol, size = 14, className = '' }: StarButtonProp
     >
       <Star
         size={size}
-        className={active ? 'fill-yellow-400 text-yellow-400' : 'text-white/25 hover:text-white/60'}
+        className={active ? 'fill-yellow-400 text-yellow-400' : 'text-foreground/25 hover:text-foreground/60'}
         strokeWidth={active ? 0 : 1.5}
       />
     </button>
