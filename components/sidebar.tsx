@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { LayoutDashboard, BarChart2, ArrowLeftRight, Shield, LogOut } from 'lucide-react'
 import { LayoutDashboard, BarChart2, ArrowLeftRight, Shield, LogOut, Compass, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { FinbroLogo } from './finbro-logo'
