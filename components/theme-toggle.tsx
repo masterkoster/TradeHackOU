@@ -12,9 +12,13 @@ export function ThemeToggle() {
   }
 
   return (
-    <Button variant="ghost" className="w-full justify-start gap-3 px-3 py-2.5 text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent text-sm font-normal" onClick={toggle}>
-      {theme === 'dark' ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
-      Theme
+    <Button
+      variant="ghost"
+      className="h-9 w-9 p-0 text-black/70 hover:text-black dark:text-white/70 dark:hover:text-white"
+      onClick={toggle}
+      aria-label="Toggle theme"
+    >
+      {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
     </Button>
   )
 }
