@@ -1,33 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-type YahooProfile = {
-  assetProfile?: {
-    longBusinessSummary?: string
-    sector?: string
-    industry?: string
-    fullTimeEmployees?: number
-    website?: string
-  }
-  price?: {
-    longName?: string
-    shortName?: string
-    symbol?: string
-    marketCap?: { raw?: number }
-  }
-  summaryDetail?: {
-    trailingEps?: { raw?: number }
-    trailingPE?: { raw?: number }
-    dividendYield?: { raw?: number }
-  }
-}
-
-const getDomain = (website?: string) => {
-  if (!website) return null
-  try {
-    return new URL(website).hostname
-  } catch {
-    return null
-  }
+type FmpProfile = {
+  symbol?: string
+  companyName?: string
+  description?: string
+  sector?: string
+  industry?: string
+  fullTimeEmployees?: number
+  mktCap?: number
+  eps?: number
+  pe?: number
+  image?: string
+  website?: string
 }
 
 export async function GET(req: NextRequest) {
@@ -39,10 +23,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const apiKey = process.env.FMP_API_KEY || 'demo'
     const res = await fetch(
-      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(
-        symbol
-      )}?modules=assetProfile,summaryDetail,price`,
+      `https://financialmodelingprep.com/api/v3/profile/${encodeURIComponent(symbol)}?apikey=${apiKey}`,
       { cache: 'no-store' }
     )
 
@@ -51,31 +34,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: text || 'Upstream error' }, { status: res.status })
     }
 
-    const json = (await res.json()) as {
-      quoteSummary?: { result?: YahooProfile[] }
-    }
-
-    const result = json.quoteSummary?.result?.[0]
+    const json = (await res.json()) as FmpProfile[]
+    const result = json?.[0]
     if (!result) {
       return NextResponse.json({ error: 'No data found' }, { status: 404 })
     }
 
-    const domain = getDomain(result.assetProfile?.website)
-    const logoUrl = domain ? `https://logo.clearbit.com/${domain}` : null
-
     return NextResponse.json({
-      symbol: result.price?.symbol ?? symbol,
-      name: result.price?.longName ?? result.price?.shortName ?? symbol,
-      summary: result.assetProfile?.longBusinessSummary ?? '',
-      sector: result.assetProfile?.sector ?? null,
-      industry: result.assetProfile?.industry ?? null,
-      employees: result.assetProfile?.fullTimeEmployees ?? null,
-      marketCap: result.price?.marketCap?.raw ?? null,
-      eps: result.summaryDetail?.trailingEps?.raw ?? null,
-      pe: result.summaryDetail?.trailingPE?.raw ?? null,
-      dividendYield: result.summaryDetail?.dividendYield?.raw ?? null,
-      website: result.assetProfile?.website ?? null,
-      logoUrl,
+      symbol: result.symbol ?? symbol,
+      name: result.companyName ?? symbol,
+      summary: result.description ?? '',
+      sector: result.sector ?? null,
+      industry: result.industry ?? null,
+      employees: result.fullTimeEmployees ?? null,
+      marketCap: result.mktCap ?? null,
+      eps: result.eps ?? null,
+      pe: result.pe ?? null,
+      dividendYield: null,
+      website: result.website ?? null,
+      logoUrl: result.image ?? null,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Server error'
