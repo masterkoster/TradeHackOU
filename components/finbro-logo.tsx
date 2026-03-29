@@ -5,7 +5,6 @@ export function FinbroLogo({ className }: { className?: string }) {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      style={{ height: '100%', width: 'auto' }}
     >
       <defs>
         <linearGradient id="accentGrad" x1="0" y1="0" x2="0" y2="1">
