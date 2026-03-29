@@ -32,10 +32,10 @@ export function Header() {
   }
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-4 py-3 bg-white/80 dark:bg-black/80 backdrop-blur-sm border-b border-black/10 dark:border-white/10">
-      <div className="flex items-center gap-6">
-        <FinbroLogo className="text-black dark:text-white h-6 w-auto" />
-        <nav className="hidden lg:flex items-center gap-5 text-sm text-black/60 dark:text-white/60">
+    <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-sm border-b border-black/10 dark:border-white/10">
+      <div className="flex items-center gap-8 min-w-0">
+        <FinbroLogo className="text-black dark:text-white h-8 w-auto shrink-0" />
+        <nav className="hidden lg:flex items-center gap-6 text-[15px] text-black/60 dark:text-white/60">
           {navItems.map((item) => (
             <button key={item} className="hover:text-black dark:hover:text-white transition-colors whitespace-nowrap">
               {item}
@@ -44,11 +44,11 @@ export function Header() {
         </nav>
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2 shrink-0">
         <ThemeToggle />
         {authed ? (
           <div className="relative group">
-            <Button variant="ghost" size="sm" className="text-black dark:text-white text-sm">
+            <Button variant="ghost" className="text-black dark:text-white text-[15px]">
               Profile
             </Button>
             <div className="absolute right-0 mt-2 w-36 rounded-md border border-black/10 dark:border-white/10 bg-white dark:bg-black shadow-lg opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition">
@@ -62,10 +62,10 @@ export function Header() {
           </div>
         ) : (
           <>
-            <Button variant="ghost" size="sm" className="text-black dark:text-white text-sm" onClick={() => setOpen(true)}>
+            <Button variant="ghost" className="text-black dark:text-white text-[15px]" onClick={() => setOpen(true)}>
               Login
             </Button>
-            <Button size="sm" className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black text-sm" onClick={() => setOpen(true)}>
+            <Button className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black text-[15px]" onClick={() => setOpen(true)}>
               Open Account
             </Button>
           </>
