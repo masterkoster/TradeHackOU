@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-type FmpProfile = {
-  symbol?: string
-  companyName?: string
-  description?: string
-  sector?: string
-  industry?: string
-  fullTimeEmployees?: number
-  mktCap?: number
-  eps?: number
-  pe?: number
-  image?: string
-  website?: string
+type AlphaVantageProfile = {
+  Symbol?: string
+  Name?: string
+  Description?: string
+  Sector?: string
+  Industry?: string
+  MarketCapitalization?: string
+  EPS?: string
+  PERatio?: string
+  DividendYield?: string
+  FullTimeEmployees?: string
+  Website?: string
 }
 
 export async function GET(req: NextRequest) {
@@ -23,9 +23,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const apiKey = process.env.FMP_API_KEY || 'demo'
+    const apiKey = process.env.ALPHA_VANTAGE_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing ALPHA_VANTAGE_API_KEY' }, { status: 500 })
+    }
+
     const res = await fetch(
-      `https://financialmodelingprep.com/api/v3/profile/${encodeURIComponent(symbol)}?apikey=${apiKey}`,
+      `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${apiKey}`,
       { cache: 'no-store' }
     )
 
@@ -34,25 +38,27 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: text || 'Upstream error' }, { status: res.status })
     }
 
-    const json = (await res.json()) as FmpProfile[]
-    const result = json?.[0]
-    if (!result) {
+    const result = (await res.json()) as AlphaVantageProfile
+    if (!result || !result.Symbol) {
       return NextResponse.json({ error: 'No data found' }, { status: 404 })
     }
 
+    const website = result.Website ?? null
+    const logoUrl = website ? `https://logo.clearbit.com/${new URL(website).hostname}` : null
+
     return NextResponse.json({
-      symbol: result.symbol ?? symbol,
-      name: result.companyName ?? symbol,
-      summary: result.description ?? '',
-      sector: result.sector ?? null,
-      industry: result.industry ?? null,
-      employees: result.fullTimeEmployees ?? null,
-      marketCap: result.mktCap ?? null,
-      eps: result.eps ?? null,
-      pe: result.pe ?? null,
-      dividendYield: null,
-      website: result.website ?? null,
-      logoUrl: result.image ?? null,
+      symbol: result.Symbol ?? symbol,
+      name: result.Name ?? symbol,
+      summary: result.Description ?? '',
+      sector: result.Sector ?? null,
+      industry: result.Industry ?? null,
+      employees: result.FullTimeEmployees ? Number(result.FullTimeEmployees) : null,
+      marketCap: result.MarketCapitalization ? Number(result.MarketCapitalization) : null,
+      eps: result.EPS ? Number(result.EPS) : null,
+      pe: result.PERatio ? Number(result.PERatio) : null,
+      dividendYield: result.DividendYield ? Number(result.DividendYield) : null,
+      website,
+      logoUrl,
     })
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Server error'
