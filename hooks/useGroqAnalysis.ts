@@ -68,5 +68,11 @@ export function useGroqAnalysis() {
     setError(null)
   }, [])
 
-  return { analysis, status, error, run, reset }
+  const hydrate = useCallback((cached: GroqAnalysis) => {
+    setAnalysis(cached)
+    setStatus('done')
+    setError(null)
+  }, [])
+
+  return { analysis, status, error, run, reset, hydrate }
 }

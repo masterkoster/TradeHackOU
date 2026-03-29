@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useBars } from '@/hooks/useBars'
 import { useGroqAnalysis } from '@/hooks/useGroqAnalysis'
 import { analyzeSentiment } from '@/lib/sentimentClient'
 import { fetchNews } from '@/lib/alpacaClient'
 import { calcSignal } from '@/lib/signal'
 import { HistoricAnalysis } from '@/components/historic-analysis'
-import type { Signal, Timeframe } from '@/types'
+import type { GroqAnalysis, Signal, Timeframe } from '@/types'
 import { useRiskProfile } from '@/contexts/RiskProfileContext'
 
 interface NewsArticleRaw {
@@ -26,7 +26,9 @@ export default function AnalyticsPage() {
   const [timeframe] = useState<Timeframe>('1Day')
 
   const { bars, loading, load } = useBars()
-  const { analysis, status: groqStatus, error: groqError, run: runGroq, reset: resetGroq } = useGroqAnalysis()
+  const { analysis, status: groqStatus, error: groqError, run: runGroq, reset: resetGroq, hydrate } = useGroqAnalysis()
+
+  const didMount = useRef(false)
 
   const handleAnalyze = useCallback(async (sym: string) => {
     const s = sym.trim().toUpperCase()
@@ -61,6 +63,43 @@ export default function AnalyticsPage() {
     if (bars.length === 0) return
     runGroq(symbol, bars, timeframe, riskProfile, headlines)
   }, [symbol, bars, timeframe, riskProfile, headlines, runGroq])
+
+  useEffect(() => {
+    if (didMount.current) return
+    didMount.current = true
+
+    const key = 'analytics:AAPL:1Day'
+    const cachedRaw = localStorage.getItem(key)
+    if (cachedRaw) {
+      try {
+        const cached = JSON.parse(cachedRaw) as { savedAt: number; analysis: GroqAnalysis }
+        const oneDayMs = 24 * 60 * 60 * 1000
+        if (Date.now() - cached.savedAt < oneDayMs) {
+          hydrate(cached.analysis)
+          setSymbol('AAPL')
+          setInput('AAPL')
+          return
+        }
+      } catch {
+        // ignore cache errors
+      }
+    }
+
+    handleAnalyze('AAPL')
+  }, [handleAnalyze, hydrate])
+
+  useEffect(() => {
+    if (!analysis) return
+    try {
+      const key = `analytics:${symbol}:${timeframe}`
+      localStorage.setItem(
+        key,
+        JSON.stringify({ analysis, savedAt: Date.now() })
+      )
+    } catch {
+      // ignore cache errors
+    }
+  }, [analysis, symbol, timeframe])
 
   const signalColors: Record<NonNullable<Signal>, string> = {
     BUY: 'bg-green-900/40 border-green-600/50 text-green-300',

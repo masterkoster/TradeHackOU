@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { StarButton } from '@/components/star-button'
 
 const COMPANY_NAMES: Record<string, string> = {
@@ -88,6 +89,21 @@ interface StockData {
   volume: number
 }
 
+interface CompanyProfile {
+  symbol: string
+  name: string
+  summary: string
+  sector: string | null
+  industry: string | null
+  employees: number | null
+  marketCap: number | null
+  eps: number | null
+  pe: number | null
+  dividendYield: number | null
+  website: string | null
+  logoUrl: string | null
+}
+
 function calcStockData(symbol: string, snap: AlpacaSnapshot): StockData {
   const price = snap.latestTrade?.p ?? snap.dailyBar?.c ?? 0
   const prevClose = snap.prevDailyBar?.c ?? snap.dailyBar?.o ?? 0
@@ -102,13 +118,24 @@ function formatVolume(v: number): string {
   return String(v)
 }
 
-function StockCard({ data, size = 'normal' }: { data: StockData; size?: 'normal' | 'large' }) {
+function StockCard({
+  data,
+  size = 'normal',
+  onOpen,
+}: {
+  data: StockData
+  size?: 'normal' | 'large'
+  onOpen: (symbol: string) => void
+}) {
   const positive = data.changePct >= 0
   const sign = positive ? '+' : ''
 
   if (size === 'large') {
     return (
-      <div className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center justify-between gap-4">
+      <button
+        onClick={() => onOpen(data.symbol)}
+        className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center justify-between gap-4 text-left hover:border-white/20 hover:bg-white/5 transition"
+      >
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             <p className="text-base font-bold text-white">{data.symbol}</p>
@@ -122,12 +149,15 @@ function StockCard({ data, size = 'normal' }: { data: StockData; size?: 'normal'
             {sign}{data.changePct.toFixed(2)}%
           </p>
         </div>
-      </div>
+      </button>
     )
   }
 
   return (
-    <div className="p-3 rounded-xl bg-[#0D0D0D] border border-white/10">
+    <button
+      onClick={() => onOpen(data.symbol)}
+      className="p-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-left hover:border-white/20 hover:bg-white/5 transition"
+    >
       <div className="flex items-start justify-between mb-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1">
@@ -148,7 +178,7 @@ function StockCard({ data, size = 'normal' }: { data: StockData; size?: 'normal'
       {data.volume > 0 && (
         <p className="text-xs text-white/30 mt-1">Vol {formatVolume(data.volume)}</p>
       )}
-    </div>
+    </button>
   )
 }
 
@@ -186,6 +216,10 @@ export default function ExplorePage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null)
+  const [selected, setSelected] = useState<CompanyProfile | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [detailLoading, setDetailLoading] = useState(false)
+  const [detailError, setDetailError] = useState<string | null>(null)
 
   const fetchSnapshots = useCallback(async () => {
     setLoading(true)
@@ -210,6 +244,26 @@ export default function ExplorePage() {
   }, [])
 
   useEffect(() => { fetchSnapshots() }, [fetchSnapshots])
+
+  const openDetails = useCallback(async (symbol: string) => {
+    setDetailOpen(true)
+    setDetailLoading(true)
+    setDetailError(null)
+    setSelected(null)
+    try {
+      const res = await fetch(`/api/market/profile?symbol=${encodeURIComponent(symbol)}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(body.error ?? `HTTP ${res.status}`)
+      }
+      const data = (await res.json()) as CompanyProfile
+      setSelected(data)
+    } catch (err) {
+      setDetailError(err instanceof Error ? err.message : 'Failed to load company profile')
+    } finally {
+      setDetailLoading(false)
+    }
+  }, [])
 
   const bySymbol = Object.fromEntries(stocks.map((s) => [s.symbol, s]))
 
@@ -258,7 +312,7 @@ export default function ExplorePage() {
             <div className="flex flex-col gap-2">
               {loading
                 ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} size="large" />)
-                : gainers.map((s) => <StockCard key={s.symbol} data={s} size="large" />)}
+                : gainers.map((s) => <StockCard key={s.symbol} data={s} size="large" onOpen={openDetails} />)}
             </div>
           </div>
 
@@ -271,7 +325,7 @@ export default function ExplorePage() {
             <div className="flex flex-col gap-2">
               {loading
                 ? Array.from({ length: 5 }).map((_, i) => <SkeletonCard key={i} size="large" />)
-                : losers.map((s) => <StockCard key={s.symbol} data={s} size="large" />)}
+                : losers.map((s) => <StockCard key={s.symbol} data={s} size="large" onOpen={openDetails} />)}
             </div>
           </div>
         </div>
@@ -288,13 +342,79 @@ export default function ExplorePage() {
                 ? group.symbols.map((_, i) => <SkeletonCard key={i} />)
                 : group.symbols.map((sym) =>
                     bySymbol[sym] ? (
-                      <StockCard key={sym} data={bySymbol[sym]} />
+                      <StockCard key={sym} data={bySymbol[sym]} onOpen={openDetails} />
                     ) : null
                   )}
             </div>
           </div>
         ))}
       </section>
+
+      <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
+        <DialogContent className="max-w-2xl bg-[#0D0D0D] border border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle>Company details</DialogTitle>
+            <DialogDescription>Fundamentals sourced from Yahoo Finance.</DialogDescription>
+          </DialogHeader>
+
+          {detailLoading && (
+            <div className="py-6 text-sm text-white/50">Loading profile…</div>
+          )}
+
+          {detailError && (
+            <div className="py-4 text-sm text-red-300">{detailError}</div>
+          )}
+
+          {selected && !detailLoading && (
+            <div className="space-y-5">
+              <div className="flex items-center gap-4">
+                {selected.logoUrl && (
+                  <img
+                    src={selected.logoUrl}
+                    alt={`${selected.name} logo`}
+                    className="w-12 h-12 rounded bg-white p-1"
+                  />
+                )}
+                <div>
+                  <p className="text-lg font-semibold">{selected.name}</p>
+                  <p className="text-sm text-white/50">{selected.symbol}</p>
+                </div>
+              </div>
+
+              {selected.summary && (
+                <p className="text-sm text-white/70 leading-relaxed">{selected.summary}</p>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
+                  <p className="text-white/40 text-xs mb-1">Sector</p>
+                  <p>{selected.sector ?? '—'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
+                  <p className="text-white/40 text-xs mb-1">Industry</p>
+                  <p>{selected.industry ?? '—'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
+                  <p className="text-white/40 text-xs mb-1">Employees</p>
+                  <p>{selected.employees ? selected.employees.toLocaleString() : '—'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
+                  <p className="text-white/40 text-xs mb-1">Market Cap</p>
+                  <p>{selected.marketCap ? `$${(selected.marketCap / 1e9).toFixed(1)}B` : '—'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
+                  <p className="text-white/40 text-xs mb-1">EPS (TTM)</p>
+                  <p>{selected.eps ?? '—'}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
+                  <p className="text-white/40 text-xs mb-1">P/E (TTM)</p>
+                  <p>{selected.pe ?? '—'}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
