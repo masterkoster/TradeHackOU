@@ -55,10 +55,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (!authed) return null
 
   return (
-<<<<<<< Updated upstream
     <FavoritesProvider>
       <RiskProfileProvider>
-        <div className="min-h-screen bg-black text-white flex">
+        <div className="min-h-screen bg-background text-foreground flex">
           <Sidebar />
           <main className="flex-1 p-6 overflow-y-auto min-h-screen">
             {children}
@@ -66,15 +65,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
       </RiskProfileProvider>
     </FavoritesProvider>
-=======
-    <RiskProfileProvider>
-      <div className="min-h-screen bg-background text-foreground flex">
-        <Sidebar />
-        <main className="flex-1 p-6 overflow-y-auto min-h-screen">
-          {children}
-        </main>
-      </div>
-    </RiskProfileProvider>
->>>>>>> Stashed changes
   )
 }
