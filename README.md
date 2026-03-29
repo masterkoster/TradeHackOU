@@ -44,11 +44,14 @@ Required keys:
 | `ALPACA_API_KEY` | Alpaca paper account |
 | `ALPACA_SECRET_KEY` | Alpaca paper account |
 | `ALPACA_BASE_URL` | `https://paper-api.alpaca.markets` |
+| `ALPACA_DATA_URL` | `https://data.alpaca.markets` |
 | `ALPACA_FEED` | `iex` |
 | `NEXT_PUBLIC_ALPACA_API_KEY` | Same paper key (for WebSocket) |
 | `NEXT_PUBLIC_ALPACA_SECRET_KEY` | Same paper secret (for WebSocket) |
-| `NEXT_PUBLIC_HF_API_KEY` | HuggingFace token |
-| `NEXT_PUBLIC_GROQ_API_KEY` | Groq API key |
+| `NEXT_PUBLIC_ALPACA_STREAM_URL` | `wss://stream.data.alpaca.markets/v2/iex` |
+| `NEXT_PUBLIC_ALPACA_FEED` | `iex` |
+| `ALPHA_VANTAGE_API_KEY` | Alpha Vantage key |
+| `GROQ_API_KEY` | Groq API key |
 
 3. Run the dev server
 

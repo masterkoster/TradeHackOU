@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Bar, WSStatus } from '@/types'
 
-const WS_URL = 'wss://stream.data.alpaca.markets/v2/iex'
-const DEFAULT_FEED = 'iex'
+const WS_URL = process.env.NEXT_PUBLIC_ALPACA_STREAM_URL ?? 'wss://stream.data.alpaca.markets/v2/iex'
+const DEFAULT_FEED = process.env.NEXT_PUBLIC_ALPACA_FEED ?? 'iex'
 
 export function useWebSocket(onBar: (bar: Bar) => void) {
   const [status, setStatus] = useState<WSStatus>('disconnected')

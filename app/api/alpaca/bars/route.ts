@@ -18,8 +18,9 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const dataBaseUrl = process.env.ALPACA_DATA_URL ?? 'https://data.alpaca.markets'
     const res = await fetch(
-      `https://data.alpaca.markets/v2/stocks/${encodeURIComponent(symbol)}/bars?timeframe=${timeframe}&limit=${limit}&feed=${feed}&adjustment=raw&start=${start.toISOString()}&end=${end.toISOString()}`,
+      `${dataBaseUrl}/v2/stocks/${encodeURIComponent(symbol)}/bars?timeframe=${timeframe}&limit=${limit}&feed=${feed}&adjustment=raw&start=${start.toISOString()}&end=${end.toISOString()}`,
       {
         headers: {
           'APCA-API-KEY-ID': apiKey,
