@@ -154,11 +154,10 @@ export default function RiskProfilePage() {
     setQuizResult(null)
   }
 
-  // ─── Landing: choose mode ───────────────────────────────────────────────────
   if (mode === 'choose') {
     return (
       <div className="max-w-xl">
-        <h1 className="text-lg font-semibold text-foreground mb-2">Risk Profile</h1>
+        <h2 className="text-base font-semibold text-foreground mb-2">Risk Profile</h2>
         <p className="text-sm text-muted-foreground mb-8">
           Your risk profile controls how aggressively the signal engine reacts to sentiment data.
           {riskProfile && (
@@ -201,7 +200,6 @@ export default function RiskProfilePage() {
     )
   }
 
-  // ─── Quick Select ───────────────────────────────────────────────────────────
   if (mode === 'select') {
     return (
       <div className="max-w-xl">
@@ -209,7 +207,7 @@ export default function RiskProfilePage() {
           <button onClick={backToChoose} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             ← Back
           </button>
-          <h1 className="text-lg font-semibold text-foreground">Choose Risk Profile</h1>
+          <h2 className="text-base font-semibold text-foreground">Choose Risk Profile</h2>
         </div>
 
         <div className="flex flex-col gap-3 mb-8">
@@ -243,7 +241,6 @@ export default function RiskProfilePage() {
           })}
         </div>
 
-        {/* Threshold preview */}
         <div className="p-5 rounded-xl bg-card border border-border mb-6">
           <p className="text-xs text-muted-foreground uppercase tracking-wide mb-4">
             Signal Thresholds — {active.label}
@@ -272,7 +269,6 @@ export default function RiskProfilePage() {
     )
   }
 
-  // ─── Quiz ───────────────────────────────────────────────────────────────────
   if (mode === 'quiz') {
     const q = QUIZ_QUESTIONS[quizStep]
     const progress = ((quizStep) / QUIZ_QUESTIONS.length) * 100
@@ -283,10 +279,9 @@ export default function RiskProfilePage() {
           <button onClick={backToChoose} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
             ← Back
           </button>
-          <h1 className="text-lg font-semibold text-foreground">Risk Quiz</h1>
+          <h2 className="text-base font-semibold text-foreground">Risk Quiz</h2>
         </div>
 
-        {/* Progress bar */}
         <div className="flex items-center gap-3 mb-8">
           <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
             <div
@@ -315,14 +310,13 @@ export default function RiskProfilePage() {
     )
   }
 
-  // ─── Done ───────────────────────────────────────────────────────────────────
   const saved = PROFILES.find((p) => p.id === riskProfile)!
 
   return (
     <div className="max-w-xl">
       <div className="flex items-center gap-3 mb-8">
         <CheckCircle2 size={20} className="text-[#22c55e]" />
-        <h1 className="text-lg font-semibold text-foreground">Profile Saved</h1>
+        <h2 className="text-base font-semibold text-foreground">Profile Saved</h2>
       </div>
 
       <div className={`p-6 rounded-xl border ${saved.bgActive} ${saved.borderActive} mb-6`}>

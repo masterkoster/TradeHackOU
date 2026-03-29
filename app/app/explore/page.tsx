@@ -95,13 +95,19 @@ interface CompanyProfile {
   summary: string
   sector: string | null
   industry: string | null
-  employees: number | null
   marketCap: number | null
   eps: number | null
   pe: number | null
   dividendYield: number | null
   website: string | null
   logoUrl: string | null
+}
+
+type SeriesMetric = 'price' | 'eps' | 'revenue' | 'netIncome' | 'assets' | 'cashflow'
+
+interface SeriesResponse {
+  label: string
+  points: Array<{ period: string; value: number }>
 }
 
 function calcStockData(symbol: string, snap: AlpacaSnapshot): StockData {
@@ -222,6 +228,9 @@ export default function ExplorePage() {
   const [detailOpen, setDetailOpen] = useState(false)
   const [detailLoading, setDetailLoading] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
+  const [seriesMetric, setSeriesMetric] = useState<SeriesMetric>('price')
+  const [seriesData, setSeriesData] = useState<SeriesResponse | null>(null)
+  const [seriesLoading, setSeriesLoading] = useState(false)
 
   const fetchSnapshots = useCallback(async () => {
     setLoading(true)
@@ -247,11 +256,30 @@ export default function ExplorePage() {
 
   useEffect(() => { fetchSnapshots() }, [fetchSnapshots])
 
+  const loadSeries = useCallback(async (symbol: string, metric: SeriesMetric) => {
+    setSeriesLoading(true)
+    try {
+      const res = await fetch(`/api/market/series?symbol=${encodeURIComponent(symbol)}&metric=${metric}`)
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(body.error ?? `HTTP ${res.status}`)
+      }
+      const data = (await res.json()) as SeriesResponse
+      setSeriesData(data)
+    } catch {
+      setSeriesData(null)
+    } finally {
+      setSeriesLoading(false)
+    }
+  }, [])
+
   const openDetails = useCallback(async (symbol: string) => {
     setDetailOpen(true)
     setDetailLoading(true)
     setDetailError(null)
     setSelected(null)
+    setSeriesMetric('price')
+    setSeriesData(null)
     try {
       const res = await fetch(`/api/market/profile?symbol=${encodeURIComponent(symbol)}`)
       if (!res.ok) {
@@ -260,12 +288,13 @@ export default function ExplorePage() {
       }
       const data = (await res.json()) as CompanyProfile
       setSelected(data)
+      loadSeries(data.symbol, 'price')
     } catch (err) {
       setDetailError(err instanceof Error ? err.message : 'Failed to load company profile')
     } finally {
       setDetailLoading(false)
     }
-  }, [])
+  }, [loadSeries])
 
   const bySymbol = Object.fromEntries(stocks.map((s) => [s.symbol, s]))
 
@@ -353,10 +382,10 @@ export default function ExplorePage() {
       </section>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Company details</DialogTitle>
-            <DialogDescription>Fundamentals sourced from Yahoo Finance.</DialogDescription>
+            <DialogDescription>Fundamentals sourced from Alpha Vantage.</DialogDescription>
           </DialogHeader>
 
           {detailLoading && (
@@ -397,10 +426,6 @@ export default function ExplorePage() {
                   <p className="text-foreground">{selected.industry ?? '—'}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-muted border border-border">
-                  <p className="text-muted-foreground text-xs mb-1">Employees</p>
-                  <p className="text-foreground">{selected.employees ? selected.employees.toLocaleString() : '—'}</p>
-                </div>
-                <div className="p-3 rounded-lg bg-muted border border-border">
                   <p className="text-muted-foreground text-xs mb-1">Market Cap</p>
                   <p className="text-foreground">{selected.marketCap ? `$${(selected.marketCap / 1e9).toFixed(1)}B` : '—'}</p>
                 </div>
@@ -413,6 +438,71 @@ export default function ExplorePage() {
                   <p className="text-foreground">{selected.pe ?? '—'}</p>
                 </div>
               </div>
+
+              <div className="space-y-3">
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      { key: 'price', label: 'Price' },
+                      { key: 'eps', label: 'EPS' },
+                      { key: 'revenue', label: 'Revenue' },
+                      { key: 'netIncome', label: 'Net Income' },
+                      { key: 'assets', label: 'Total Assets' },
+                      { key: 'cashflow', label: 'Cash Flow' },
+                    ] as Array<{ key: SeriesMetric; label: string }>
+                  ).map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() => {
+                        setSeriesMetric(item.key)
+                        loadSeries(selected.symbol, item.key)
+                      }}
+                      className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${
+                        seriesMetric === item.key
+                          ? 'bg-white/10 border-white/30 text-white'
+                          : 'border-white/10 text-white/60 hover:text-white'
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-black/30 p-3">
+                  {seriesLoading && (
+                    <p className="text-xs text-white/40">Loading {seriesMetric}…</p>
+                  )}
+                  {!seriesLoading && seriesData && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-white/40">{seriesData.label}</p>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs">
+                          <thead>
+                            <tr className="text-white/40">
+                              <th className="text-left py-1">Period</th>
+                              <th className="text-right py-1">Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {seriesData.points.map((point) => (
+                              <tr key={`${point.period}-${point.value}`} className="border-t border-white/5">
+                                <td className="py-1 text-white/70">{point.period}</td>
+                                <td className="py-1 text-right text-white">
+                                  {point.value.toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
+                  {!seriesLoading && !seriesData && (
+                    <p className="text-xs text-white/40">No data available.</p>
+                  )}
+                </div>
+              </div>
+
             </div>
           )}
         </DialogContent>

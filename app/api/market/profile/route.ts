@@ -1,33 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-type YahooProfile = {
-  assetProfile?: {
-    longBusinessSummary?: string
-    sector?: string
-    industry?: string
-    fullTimeEmployees?: number
-    website?: string
-  }
-  price?: {
-    longName?: string
-    shortName?: string
-    symbol?: string
-    marketCap?: { raw?: number }
-  }
-  summaryDetail?: {
-    trailingEps?: { raw?: number }
-    trailingPE?: { raw?: number }
-    dividendYield?: { raw?: number }
-  }
-}
-
-const getDomain = (website?: string) => {
-  if (!website) return null
-  try {
-    return new URL(website).hostname
-  } catch {
-    return null
-  }
+type AlphaVantageProfile = {
+  Symbol?: string
+  Name?: string
+  Description?: string
+  Sector?: string
+  Industry?: string
+  MarketCapitalization?: string
+  EPS?: string
+  PERatio?: string
+  DividendYield?: string
+  FullTimeEmployees?: string
+  Website?: string
 }
 
 export async function GET(req: NextRequest) {
@@ -39,10 +23,13 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const apiKey = process.env.ALPHA_VANTAGE_API_KEY
+    if (!apiKey) {
+      return NextResponse.json({ error: 'Missing ALPHA_VANTAGE_API_KEY' }, { status: 500 })
+    }
+
     const res = await fetch(
-      `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${encodeURIComponent(
-        symbol
-      )}?modules=assetProfile,summaryDetail,price`,
+      `https://www.alphavantage.co/query?function=OVERVIEW&symbol=${encodeURIComponent(symbol)}&apikey=${apiKey}`,
       { cache: 'no-store' }
     )
 
@@ -51,30 +38,25 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: text || 'Upstream error' }, { status: res.status })
     }
 
-    const json = (await res.json()) as {
-      quoteSummary?: { result?: YahooProfile[] }
-    }
-
-    const result = json.quoteSummary?.result?.[0]
-    if (!result) {
+    const result = (await res.json()) as AlphaVantageProfile
+    if (!result || !result.Symbol) {
       return NextResponse.json({ error: 'No data found' }, { status: 404 })
     }
 
-    const domain = getDomain(result.assetProfile?.website)
-    const logoUrl = domain ? `https://logo.clearbit.com/${domain}` : null
+    const website = result.Website ?? null
+    const logoUrl = website ? `https://logo.clearbit.com/${new URL(website).hostname}` : null
 
     return NextResponse.json({
-      symbol: result.price?.symbol ?? symbol,
-      name: result.price?.longName ?? result.price?.shortName ?? symbol,
-      summary: result.assetProfile?.longBusinessSummary ?? '',
-      sector: result.assetProfile?.sector ?? null,
-      industry: result.assetProfile?.industry ?? null,
-      employees: result.assetProfile?.fullTimeEmployees ?? null,
-      marketCap: result.price?.marketCap?.raw ?? null,
-      eps: result.summaryDetail?.trailingEps?.raw ?? null,
-      pe: result.summaryDetail?.trailingPE?.raw ?? null,
-      dividendYield: result.summaryDetail?.dividendYield?.raw ?? null,
-      website: result.assetProfile?.website ?? null,
+      symbol: result.Symbol ?? symbol,
+      name: result.Name ?? symbol,
+      summary: result.Description ?? '',
+      sector: result.Sector ?? null,
+      industry: result.Industry ?? null,
+      marketCap: result.MarketCapitalization ? Number(result.MarketCapitalization) : null,
+      eps: result.EPS ? Number(result.EPS) : null,
+      pe: result.PERatio ? Number(result.PERatio) : null,
+      dividendYield: result.DividendYield ? Number(result.DividendYield) : null,
+      website,
       logoUrl,
     })
   } catch (error) {

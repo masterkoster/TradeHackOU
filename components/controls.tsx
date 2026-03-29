@@ -1,16 +1,18 @@
 'use client'
 
-import type { ChartType, RiskProfile, Timeframe } from '@/types'
+import type { ChartType, RiskProfile, Timeframe, VisualizationMode } from '@/types'
 
 interface ControlsProps {
   symbol: string
   timeframe: Timeframe
   chartType: ChartType
+  visualization: VisualizationMode
   riskProfile: RiskProfile
   loading: boolean
   onSymbolChange: (s: string) => void
   onTimeframeChange: (t: Timeframe) => void
   onChartTypeChange: (c: ChartType) => void
+  onVisualizationChange: (v: VisualizationMode) => void
   onRiskProfileChange: (r: RiskProfile) => void
   onLoad: () => void
 }
@@ -18,16 +20,26 @@ interface ControlsProps {
 const TIMEFRAMES: Timeframe[] = ['1Min', '5Min', '15Min', '1Hour', '1Day', '1Week', '1Month']
 const CHART_TYPES: ChartType[] = ['candlestick', 'line', 'area', 'ohlc', 'heikin-ashi']
 const RISK_PROFILES: RiskProfile[] = ['low', 'moderate', 'high']
+const VISUAL_OPTIONS: { value: VisualizationMode; label: string }[] = [
+  { value: 'standard', label: 'Standard' },
+  { value: 'returns', label: 'Returns %' },
+  { value: 'moving-averages', label: 'MA Overlay' },
+  { value: 'volume', label: 'Volume Focus' },
+  { value: 'vwap', label: 'VWAP' },
+  { value: 'multi', label: 'Multi-Symbol' },
+]
 
 export function Controls({
   symbol,
   timeframe,
   chartType,
+  visualization,
   riskProfile,
   loading,
   onSymbolChange,
   onTimeframeChange,
   onChartTypeChange,
+  onVisualizationChange,
   onRiskProfileChange,
   onLoad,
 }: ControlsProps) {
@@ -77,6 +89,22 @@ export function Controls({
             {ct === 'heikin-ashi' ? 'HA' : ct}
           </button>
         ))}
+      </div>
+
+      {/* Visualization */}
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-400">View</span>
+        <select
+          value={visualization}
+          onChange={(e) => onVisualizationChange(e.target.value as VisualizationMode)}
+          className="px-2 py-1.5 text-xs rounded-md bg-[#1A1A1A] border border-[#333] text-white"
+        >
+          {VISUAL_OPTIONS.map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
       </div>
 
       {/* Risk profile */}

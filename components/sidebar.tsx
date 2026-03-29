@@ -14,7 +14,7 @@ const NAV_ITEMS = [
   { label: 'Explore', href: '/app/explore', icon: Compass },
   { label: 'Compare', href: '/app/compare', icon: ArrowLeftRight },
   { label: 'Favorites', href: '/app/favorites', icon: Star },
-  { label: 'Risk Profile', href: '/app/risk-profile', icon: Shield },
+  { label: 'Profile', href: '/app/profile', icon: Shield },
 ]
 
 export function Sidebar() {
