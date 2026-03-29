@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
-import RiskProfilePage from '@/app/app/risk-profile/page'
+import { RiskProfileWidget } from '@/components/risk-profile-widget'
 
 export default function ProfilePage() {
   const [name, setName] = useState('')
@@ -80,7 +80,7 @@ export default function ProfilePage() {
       </div>
 
       <div className="max-w-2xl">
-        <RiskProfilePage />
+        <RiskProfileWidget />
       </div>
     </div>
   )
