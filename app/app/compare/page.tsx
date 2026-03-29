@@ -1,5 +1,6 @@
 'use client'
 
+<<<<<<< Updated upstream
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { CompareChart, type StockSeries } from '@/components/compare-chart'
 import { fetchBarsForPeriod } from '@/lib/alpacaClient'
@@ -7,6 +8,29 @@ import { StarButton } from '@/components/star-button'
 import type { Bar, Timeframe } from '@/types'
 
 // ─── Period config ────────────────────────────────────────────────────────────
+=======
+import { useState, useCallback } from 'react'
+import { useBars } from '@/hooks/useBars'
+import { Chart } from '@/components/chart'
+import { Plus } from 'lucide-react'
+import type { ChartType, Timeframe } from '@/types'
+
+const LABELS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] as const
+const MAX_PANELS = 8
+
+function SymbolPanel({
+  label,
+  defaultSymbol,
+}: {
+  label: string
+  defaultSymbol: string
+}) {
+  const [input, setInput] = useState(defaultSymbol)
+  const [symbol, setSymbol] = useState(defaultSymbol)
+  const [timeframe, setTimeframe] = useState<Timeframe>('1Day')
+  const [chartType] = useState<ChartType>('line')
+  const { bars, loading, error, load } = useBars()
+>>>>>>> Stashed changes
 
 const PERIODS = [
   { key: '1D',  label: '1D',  days: 1,   timeframe: '5Min'  as Timeframe, limit: 100 },
@@ -18,6 +42,7 @@ const PERIODS = [
 
 const COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#ef4444', '#06b6d4']
 
+<<<<<<< Updated upstream
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Stock {
@@ -209,6 +234,99 @@ export default function ComparePage() {
             + Add stock
           </button>
         )}
+=======
+  return (
+    <div className="p-4 rounded-2xl bg-card border border-border flex flex-col gap-4 min-w-0">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="w-6 h-6 rounded-full bg-muted text-xs font-bold text-muted-foreground flex items-center justify-center shrink-0">
+          {label}
+        </span>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value.toUpperCase())}
+          onKeyDown={(e) => e.key === 'Enter' && handleLoad()}
+          placeholder="Symbol…"
+          className="w-24 px-2.5 py-1.5 rounded-lg bg-background border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-[#22c55e]/50"
+        />
+        <div className="flex gap-1 flex-wrap">
+          {timeframes.map((tf) => (
+            <button
+              key={tf}
+              onClick={() => setTimeframe(tf)}
+              className={`px-2 py-1 rounded text-xs transition-colors ${
+                timeframe === tf
+                  ? 'bg-[#22c55e]/10 text-[#22c55e]'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {tf}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={handleLoad}
+          disabled={loading}
+          className="ml-auto px-3 py-1.5 rounded-lg bg-[#22c55e] text-black text-xs font-medium hover:bg-[#16a34a] disabled:opacity-50 transition-colors shrink-0"
+        >
+          {loading ? '…' : 'Load'}
+        </button>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="text-base font-semibold text-foreground">{symbol}</span>
+        <span className="text-sm text-muted-foreground">{timeframe}</span>
+      </div>
+
+      {error && (
+        <p className="text-sm text-red-400">{error}</p>
+      )}
+
+      {bars.length > 0 ? (
+        <Chart bars={bars} chartType={chartType} />
+      ) : !loading ? (
+        <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">
+          Click Load to fetch data
+        </div>
+      ) : (
+        <div className="h-48 flex items-center justify-center">
+          <div className="w-7 h-7 border-2 border-[#22c55e] border-t-transparent rounded-full animate-spin" />
+        </div>
+      )}
+    </div>
+  )
+}
+
+const DEFAULT_SYMBOLS = ['AAPL', 'TSLA', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'NFLX']
+
+export default function ComparePage() {
+  const [count, setCount] = useState(2)
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-lg font-semibold text-foreground">Compare</h1>
+          <p className="text-sm text-muted-foreground mt-1">Load symbols to compare their charts side by side.</p>
+        </div>
+        {count < MAX_PANELS && (
+          <button
+            onClick={() => setCount((c) => Math.min(c + 1, MAX_PANELS))}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#22c55e]/10 text-[#22c55e] text-sm font-medium hover:bg-[#22c55e]/20 transition-colors"
+          >
+            <Plus size={14} />
+            Add Panel
+          </button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {Array.from({ length: count }, (_, i) => (
+          <SymbolPanel
+            key={i}
+            label={LABELS[i]}
+            defaultSymbol={DEFAULT_SYMBOLS[i]}
+          />
+        ))}
+>>>>>>> Stashed changes
       </div>
 
       {/* Period selector */}

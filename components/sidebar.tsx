@@ -7,6 +7,7 @@ import { LayoutDashboard, BarChart2, ArrowLeftRight, Shield, LogOut } from 'luci
 import { LayoutDashboard, BarChart2, ArrowLeftRight, Shield, LogOut, Compass, Star } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { FinbroLogo } from './finbro-logo'
+import { ThemeToggle } from './theme-toggle'
 
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/app', icon: LayoutDashboard },
@@ -61,9 +62,9 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="w-56 min-h-screen bg-[#0D0D0D] border-r border-white/10 flex flex-col shrink-0 sticky top-0">
-      <div className="p-4 border-b border-white/10">
-        <FinbroLogo className="h-6 w-auto text-white" />
+    <aside className="w-56 h-screen bg-sidebar border-r border-sidebar-border flex flex-col shrink-0 sticky top-0 overflow-y-auto">
+      <div className="p-4 border-b border-sidebar-border">
+        <FinbroLogo className="h-6 w-auto text-sidebar-foreground" />
       </div>
 
       <nav className="flex-1 p-3 flex flex-col gap-1">
@@ -80,7 +81,7 @@ export function Sidebar() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 active
                   ? 'bg-[#22c55e]/10 text-[#22c55e]'
-                  : 'text-white/60 hover:text-white hover:bg-white/5'
+                  : 'text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent'
               }`}
             >
               <Icon size={16} />
@@ -90,10 +91,13 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="p-3 border-t border-white/10">
+      <div className="p-3 border-t border-sidebar-border flex flex-col gap-1">
+        <div className="px-1">
+          <ThemeToggle />
+        </div>
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/60 hover:text-white hover:bg-white/5 transition-colors w-full"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/60 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors w-full"
         >
           <LogOut size={16} />
           Sign out
