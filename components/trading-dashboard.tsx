@@ -1,21 +1,23 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import type { Bar, ChartType, Signal, Timeframe } from '@/types'
+import type { Bar, ChartType, Signal, Timeframe, VisualizationMode } from '@/types'
 import { useRiskProfile } from '@/contexts/RiskProfileContext'
 import { useBars } from '@/hooks/useBars'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import { useGroqAnalysis } from '@/hooks/useGroqAnalysis'
 import { analyzeSentiment } from '@/lib/sentimentClient'
 import { calcSignal } from '@/lib/signal'
-import { fetchNews } from '@/lib/alpacaClient'
+import { fetchBars, fetchNews } from '@/lib/alpacaClient'
 import { Chart } from './chart'
+import { CompareChart, type StockSeries } from './compare-chart'
 import { Controls } from './controls'
 import { StaleBanner } from './stale-banner'
 import { WSStatusDot } from './ws-status-dot'
 import { RiskProfileBadge } from './risk-profile'
 import { HistoricAnalysis } from './historic-analysis'
 import { StarButton } from './star-button'
+import { sma, toReturnsSeries, vwap } from '@/lib/indicators'
 
 interface NewsArticleRaw {
   headline: string
@@ -33,6 +35,9 @@ export function TradingDashboard() {
   const [pendingSymbol, setPendingSymbol] = useState('AAPL')
   const [timeframe, setTimeframe] = useState<Timeframe>('1Day')
   const [chartType, setChartType] = useState<ChartType>('candlestick')
+  const [visualization, setVisualization] = useState<VisualizationMode>('standard')
+  const [multiSymbols, setMultiSymbols] = useState('AAPL,QQQ')
+  const [multiSeries, setMultiSeries] = useState<StockSeries[]>([])
   const { riskProfile, setRiskProfile } = useRiskProfile()
   const [signal, setSignal] = useState<Signal>(null)
   const [liveBars, setLiveBars] = useState<Bar[]>([])
@@ -57,6 +62,41 @@ export function TradingDashboard() {
         (a, b) => a.time - b.time
       )
     : bars
+
+  const returnsSeries = visualization === 'returns' ? toReturnsSeries(allBars) : []
+  const overlays = {
+    ma20: visualization === 'moving-averages' ? sma(allBars, 20) : undefined,
+    ma50: visualization === 'moving-averages' ? sma(allBars, 50) : undefined,
+    vwap: visualization === 'vwap' ? vwap(allBars) : undefined,
+  }
+
+  const multiColors = ['#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#ef4444', '#06b6d4']
+
+  const loadMultiSymbols = useCallback(async () => {
+    const symbols = multiSymbols
+      .split(',')
+      .map((s) => s.trim().toUpperCase())
+      .filter(Boolean)
+      .slice(0, multiColors.length)
+
+    if (symbols.length === 0) {
+      setMultiSeries([])
+      return
+    }
+
+    const results = await Promise.all(
+      symbols.map(async (sym, index) => {
+        try {
+          const { bars: seriesBars } = await fetchBars(sym, timeframe, 200, true)
+          return { symbol: sym, bars: seriesBars, color: multiColors[index] }
+        } catch {
+          return { symbol: sym, bars: [], color: multiColors[index] }
+        }
+      })
+    )
+
+    setMultiSeries(results)
+  }, [multiSymbols, timeframe])
 
   const fetchMarketStatus = useCallback(async () => {
     try {
@@ -151,6 +191,12 @@ export function TradingDashboard() {
   }, [timeframe, load, wsConnect, wsDisconnect])
 
   useEffect(() => {
+    if (visualization === 'multi') {
+      loadMultiSymbols()
+    }
+  }, [visualization, loadMultiSymbols])
+
+  useEffect(() => {
     const id = setInterval(() => {
       const last = lastRequestRef.current
       if (!last) return
@@ -173,11 +219,13 @@ export function TradingDashboard() {
         symbol={pendingSymbol}
         timeframe={timeframe}
         chartType={chartType}
+        visualization={visualization}
         riskProfile={riskProfile}
         loading={loading}
         onSymbolChange={setPendingSymbol}
         onTimeframeChange={(tf) => { setTimeframe(tf); setLiveBars([]) }}
         onChartTypeChange={setChartType}
+        onVisualizationChange={setVisualization}
         onRiskProfileChange={setRiskProfile}
         onLoad={handleLoad}
       />
@@ -222,7 +270,34 @@ export function TradingDashboard() {
           {loading && <span className="text-xs text-gray-500 animate-pulse">Loading…</span>}
         </div>
         {allBars.length > 0 ? (
-          <Chart bars={allBars} chartType={chartType} />
+          visualization === 'multi' ? (
+            <div>
+              <div className="flex flex-wrap items-center gap-2 mb-4">
+                <input
+                  value={multiSymbols}
+                  onChange={(e) => setMultiSymbols(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && loadMultiSymbols()}
+                  placeholder="AAPL, QQQ, MSFT"
+                  className="w-64 px-3 py-1.5 rounded-lg bg-[#1A1A1A] border border-[#333] text-white text-xs placeholder-gray-500 focus:outline-none focus:border-[#555]"
+                />
+                <button
+                  onClick={loadMultiSymbols}
+                  className="px-3 py-1.5 rounded-lg bg-[#22c55e] text-black text-xs font-medium hover:bg-[#16a34a]"
+                >
+                  Apply
+                </button>
+              </div>
+              <CompareChart series={multiSeries.filter((s) => s.bars.length > 0)} />
+            </div>
+          ) : (
+            <Chart
+              bars={allBars}
+              chartType={chartType}
+              overlays={overlays}
+              mode={visualization === 'volume' ? 'volume' : visualization === 'returns' ? 'returns' : 'standard'}
+              returns={returnsSeries}
+            />
+          )
         ) : !loading ? (
           <div className="h-[400px] flex items-center justify-center text-gray-500 text-sm">
             Enter a symbol and click Load

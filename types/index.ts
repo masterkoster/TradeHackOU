@@ -8,6 +8,13 @@ export interface Bar {
 }
 
 export type ChartType = 'candlestick' | 'line' | 'area' | 'ohlc' | 'heikin-ashi'
+export type VisualizationMode =
+  | 'standard'
+  | 'returns'
+  | 'moving-averages'
+  | 'volume'
+  | 'vwap'
+  | 'multi'
 export type Timeframe = '1Min' | '5Min' | '15Min' | '1Hour' | '1Day' | '1Week' | '1Month'
 export type WSStatus = 'disconnected' | 'connecting' | 'authenticated' | 'error'
 export type RiskProfile = 'low' | 'moderate' | 'high'

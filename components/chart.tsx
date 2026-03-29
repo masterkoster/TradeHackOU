@@ -4,18 +4,27 @@ import { useEffect, useRef } from 'react'
 import type { IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts'
 import { ColorType, createChart } from 'lightweight-charts'
 import type { Bar, ChartType } from '@/types'
+import type { LinePoint } from '@/lib/indicators'
 import { toHeikinAshi } from '@/lib/heikinAshi'
 
 interface ChartProps {
   bars: Bar[]
   chartType: ChartType
+  overlays?: {
+    ma20?: LinePoint[]
+    ma50?: LinePoint[]
+    vwap?: LinePoint[]
+  }
+  mode?: 'standard' | 'returns' | 'volume'
+  returns?: LinePoint[]
 }
 
-export function Chart({ bars, chartType }: ChartProps) {
+export function Chart({ bars, chartType, overlays, mode = 'standard', returns }: ChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const mainSeriesRef = useRef<ISeriesApi<'Candlestick' | 'Line' | 'Area' | 'Bar'> | null>(null)
   const volumeRef = useRef<ISeriesApi<'Histogram'> | null>(null)
+  const overlayRefs = useRef<ISeriesApi<'Line'>[]>([])
 
   // Create chart once on mount
   useEffect(() => {
@@ -71,9 +80,16 @@ export function Chart({ bars, chartType }: ChartProps) {
       mainSeriesRef.current = null
     }
 
+    overlayRefs.current.forEach((s) => chart.removeSeries(s))
+    overlayRefs.current = []
+
     const display = chartType === 'heikin-ashi' ? toHeikinAshi(bars) : bars
 
-    if (chartType === 'line') {
+    if (mode === 'returns' && returns && returns.length > 0) {
+      const s = chart.addLineSeries({ color: '#38bdf8', lineWidth: 2 })
+      s.setData(returns.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })))
+      mainSeriesRef.current = s as ISeriesApi<'Line'>
+    } else if (chartType === 'line') {
       const s = chart.addLineSeries({ color: '#22c55e', lineWidth: 2 })
       s.setData(display.map((b) => ({ time: b.time as UTCTimestamp, value: b.close })))
       mainSeriesRef.current = s as ISeriesApi<'Line'>
@@ -122,17 +138,45 @@ export function Chart({ bars, chartType }: ChartProps) {
 
     // Volume
     if (volumeRef.current) {
-      volumeRef.current.setData(
-        bars.map((b) => ({
-          time: b.time as UTCTimestamp,
-          value: b.volume,
-          color: b.close >= b.open ? 'rgba(34,197,94,0.35)' : 'rgba(239,68,68,0.35)',
-        }))
-      )
+      if (mode === 'volume') {
+        volumeRef.current.setData(
+          bars.map((b) => ({
+            time: b.time as UTCTimestamp,
+            value: b.volume,
+            color: b.close >= b.open ? 'rgba(34,197,94,0.45)' : 'rgba(239,68,68,0.45)',
+          }))
+        )
+      } else {
+        volumeRef.current.setData(
+          bars.map((b) => ({
+            time: b.time as UTCTimestamp,
+            value: b.volume,
+            color: b.close >= b.open ? 'rgba(34,197,94,0.2)' : 'rgba(239,68,68,0.2)',
+          }))
+        )
+      }
+    }
+
+    if (overlays?.ma20?.length) {
+      const s = chart.addLineSeries({ color: '#f59e0b', lineWidth: 2 })
+      s.setData(overlays.ma20.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })))
+      overlayRefs.current.push(s)
+    }
+
+    if (overlays?.ma50?.length) {
+      const s = chart.addLineSeries({ color: '#a855f7', lineWidth: 2 })
+      s.setData(overlays.ma50.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })))
+      overlayRefs.current.push(s)
+    }
+
+    if (overlays?.vwap?.length) {
+      const s = chart.addLineSeries({ color: '#38bdf8', lineWidth: 2 })
+      s.setData(overlays.vwap.map((p) => ({ time: p.time as UTCTimestamp, value: p.value })))
+      overlayRefs.current.push(s)
     }
 
     chart.timeScale().fitContent()
-  }, [bars, chartType])
+  }, [bars, chartType, overlays, mode, returns])
 
   return <div ref={containerRef} className="w-full rounded-lg overflow-hidden" />
 }

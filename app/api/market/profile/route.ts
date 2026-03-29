@@ -52,7 +52,6 @@ export async function GET(req: NextRequest) {
       summary: result.Description ?? '',
       sector: result.Sector ?? null,
       industry: result.Industry ?? null,
-      employees: result.FullTimeEmployees ? Number(result.FullTimeEmployees) : null,
       marketCap: result.MarketCapitalization ? Number(result.MarketCapitalization) : null,
       eps: result.EPS ? Number(result.EPS) : null,
       pe: result.PERatio ? Number(result.PERatio) : null,
