@@ -44,7 +44,7 @@ export function Controls({
   onLoad,
 }: ControlsProps) {
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-[#0D0D0D] rounded-2xl">
+    <div className="flex flex-wrap items-center gap-3 p-4 bg-card rounded-2xl border border-border">
       {/* Symbol */}
       <div className="flex items-center gap-2">
         <input
@@ -53,20 +53,20 @@ export function Controls({
           onChange={(e) => onSymbolChange(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === 'Enter' && onLoad()}
           placeholder="Symbol"
-          className="w-24 px-3 py-1.5 bg-[#1A1A1A] border border-[#333] rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#555] uppercase"
+          className="w-24 px-3 py-1.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring uppercase"
         />
       </div>
 
       {/* Timeframe */}
-      <div className="flex items-center bg-[#1A1A1A] rounded-lg p-1">
+      <div className="flex items-center bg-muted rounded-lg p-1">
         {TIMEFRAMES.map((tf) => (
           <button
             key={tf}
             onClick={() => onTimeframeChange(tf)}
             className={`px-2 py-1 text-xs rounded-md transition-colors ${
               timeframe === tf
-                ? 'bg-[#2A2A2A] text-white shadow-sm'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {tf}
@@ -75,15 +75,15 @@ export function Controls({
       </div>
 
       {/* Chart type */}
-      <div className="flex items-center bg-[#1A1A1A] rounded-lg p-1">
+      <div className="flex items-center bg-muted rounded-lg p-1">
         {CHART_TYPES.map((ct) => (
           <button
             key={ct}
             onClick={() => onChartTypeChange(ct)}
             className={`px-2 py-1 text-xs rounded-md transition-colors capitalize ${
               chartType === ct
-                ? 'bg-[#2A2A2A] text-white shadow-sm'
-                : 'text-gray-400 hover:text-white'
+                ? 'bg-background text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {ct === 'heikin-ashi' ? 'HA' : ct}
@@ -108,7 +108,7 @@ export function Controls({
       </div>
 
       {/* Risk profile */}
-      <div className="flex items-center bg-[#1A1A1A] rounded-lg p-1">
+      <div className="flex items-center bg-muted rounded-lg p-1">
         {RISK_PROFILES.map((rp) => (
           <button
             key={rp}
@@ -116,11 +116,11 @@ export function Controls({
             className={`px-2 py-1 text-xs rounded-md transition-colors capitalize ${
               riskProfile === rp
                 ? rp === 'low'
-                  ? 'bg-green-900/60 text-green-300 shadow-sm'
+                  ? 'bg-green-100 text-green-700 shadow-sm dark:bg-green-900/60 dark:text-green-300'
                   : rp === 'moderate'
-                  ? 'bg-yellow-900/60 text-yellow-300 shadow-sm'
-                  : 'bg-red-900/60 text-red-300 shadow-sm'
-                : 'text-gray-400 hover:text-white'
+                  ? 'bg-yellow-100 text-yellow-700 shadow-sm dark:bg-yellow-900/60 dark:text-yellow-300'
+                  : 'bg-red-100 text-red-700 shadow-sm dark:bg-red-900/60 dark:text-red-300'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {rp}

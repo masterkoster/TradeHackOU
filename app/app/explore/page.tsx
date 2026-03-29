@@ -140,18 +140,18 @@ function StockCard({
     return (
       <button
         onClick={() => onOpen(data.symbol)}
-        className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center justify-between gap-4 text-left hover:border-white/20 hover:bg-white/5 transition"
+        className="p-4 rounded-xl bg-card border border-border flex items-center justify-between gap-4 text-left hover:border-foreground/20 hover:bg-accent transition"
       >
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
-            <p className="text-base font-bold text-white">{data.symbol}</p>
+            <p className="text-base font-bold text-foreground">{data.symbol}</p>
             <StarButton symbol={data.symbol} size={13} />
           </div>
-          <p className="text-xs text-white/40 truncate">{COMPANY_NAMES[data.symbol] ?? data.symbol}</p>
+          <p className="text-xs text-muted-foreground truncate">{COMPANY_NAMES[data.symbol] ?? data.symbol}</p>
         </div>
         <div className="text-right shrink-0">
-          <p className="text-base font-semibold text-white">${data.price.toFixed(2)}</p>
-          <p className={`text-sm font-semibold ${positive ? 'text-[#22c55e]' : 'text-red-400'}`}>
+          <p className="text-base font-semibold text-foreground">${data.price.toFixed(2)}</p>
+          <p className={`text-sm font-semibold ${positive ? 'text-[#22c55e]' : 'text-red-500 dark:text-red-400'}`}>
             {sign}{data.changePct.toFixed(2)}%
           </p>
         </div>
@@ -162,27 +162,29 @@ function StockCard({
   return (
     <button
       onClick={() => onOpen(data.symbol)}
-      className="p-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-left hover:border-white/20 hover:bg-white/5 transition"
+      className="p-3 rounded-xl bg-card border border-border text-left hover:border-foreground/20 hover:bg-accent transition"
     >
       <div className="flex items-start justify-between mb-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1">
-            <p className="text-sm font-bold text-white">{data.symbol}</p>
+            <p className="text-sm font-bold text-foreground">{data.symbol}</p>
             <StarButton symbol={data.symbol} size={12} />
           </div>
-          <p className="text-xs text-white/40 truncate">{COMPANY_NAMES[data.symbol] ?? data.symbol}</p>
+          <p className="text-xs text-muted-foreground truncate">{COMPANY_NAMES[data.symbol] ?? data.symbol}</p>
         </div>
         <span
           className={`text-xs font-semibold px-1.5 py-0.5 rounded shrink-0 ml-2 ${
-            positive ? 'text-[#22c55e] bg-[#22c55e]/10' : 'text-red-400 bg-red-900/20'
+            positive
+              ? 'text-[#22c55e] bg-[#22c55e]/10'
+              : 'text-red-500 bg-red-100 dark:text-red-400 dark:bg-red-900/20'
           }`}
         >
           {sign}{data.changePct.toFixed(2)}%
         </span>
       </div>
-      <p className="text-sm font-semibold text-white">${data.price.toFixed(2)}</p>
+      <p className="text-sm font-semibold text-foreground">${data.price.toFixed(2)}</p>
       {data.volume > 0 && (
-        <p className="text-xs text-white/30 mt-1">Vol {formatVolume(data.volume)}</p>
+        <p className="text-xs text-muted-foreground mt-1">Vol {formatVolume(data.volume)}</p>
       )}
     </button>
   )
@@ -191,28 +193,28 @@ function StockCard({
 function SkeletonCard({ size = 'normal' }: { size?: 'normal' | 'large' }) {
   if (size === 'large') {
     return (
-      <div className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center justify-between gap-4 animate-pulse">
+      <div className="p-4 rounded-xl bg-card border border-border flex items-center justify-between gap-4 animate-pulse">
         <div className="space-y-2">
-          <div className="h-4 w-12 bg-white/10 rounded" />
-          <div className="h-3 w-20 bg-white/5 rounded" />
+          <div className="h-4 w-12 bg-muted-foreground/20 rounded" />
+          <div className="h-3 w-20 bg-muted-foreground/10 rounded" />
         </div>
         <div className="space-y-2 text-right">
-          <div className="h-4 w-16 bg-white/10 rounded" />
-          <div className="h-3 w-12 bg-white/5 rounded" />
+          <div className="h-4 w-16 bg-muted-foreground/20 rounded" />
+          <div className="h-3 w-12 bg-muted-foreground/10 rounded" />
         </div>
       </div>
     )
   }
   return (
-    <div className="p-3 rounded-xl bg-[#0D0D0D] border border-white/10 animate-pulse">
+    <div className="p-3 rounded-xl bg-card border border-border animate-pulse">
       <div className="flex items-start justify-between mb-2">
         <div className="space-y-1.5">
-          <div className="h-4 w-10 bg-white/10 rounded" />
-          <div className="h-3 w-16 bg-white/5 rounded" />
+          <div className="h-4 w-10 bg-muted-foreground/20 rounded" />
+          <div className="h-3 w-16 bg-muted-foreground/10 rounded" />
         </div>
-        <div className="h-5 w-14 bg-white/5 rounded" />
+        <div className="h-5 w-14 bg-muted-foreground/10 rounded" />
       </div>
-      <div className="h-4 w-14 bg-white/10 rounded" />
+      <div className="h-4 w-14 bg-muted-foreground/20 rounded" />
     </div>
   )
 }
@@ -304,17 +306,17 @@ export default function ExplorePage() {
     <div className="max-w-5xl space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-white">Explore</h1>
+        <h1 className="text-lg font-semibold text-foreground">Explore</h1>
         <div className="flex items-center gap-3">
           {lastUpdated && (
-            <span className="text-xs text-white/30">
+            <span className="text-xs text-muted-foreground">
               Updated {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </span>
           )}
           <button
             onClick={fetchSnapshots}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/60 hover:text-white hover:border-white/20 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground/20 disabled:opacity-50 transition-colors"
           >
             <RefreshCw size={12} className={loading ? 'animate-spin' : ''} />
             Refresh
@@ -323,20 +325,20 @@ export default function ExplorePage() {
       </div>
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-900/20 border border-red-600/30 text-red-300 text-sm">
+        <div className="p-4 rounded-xl bg-red-50 border border-red-300 text-red-600 text-sm dark:bg-red-900/20 dark:border-red-600/30 dark:text-red-300">
           {error}
         </div>
       )}
 
       {/* Today's Movers */}
       <section>
-        <p className="text-xs text-white/40 uppercase tracking-wide mb-4">Today&apos;s Movers</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-4">Today&apos;s Movers</p>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Gainers */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <TrendingUp size={14} className="text-[#22c55e]" />
-              <p className="text-sm font-medium text-white">Top Gainers</p>
+              <p className="text-sm font-medium text-foreground">Top Gainers</p>
             </div>
             <div className="flex flex-col gap-2">
               {loading
@@ -348,8 +350,8 @@ export default function ExplorePage() {
           {/* Losers */}
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <TrendingDown size={14} className="text-red-400" />
-              <p className="text-sm font-medium text-white">Top Losers</p>
+              <TrendingDown size={14} className="text-red-500 dark:text-red-400" />
+              <p className="text-sm font-medium text-foreground">Top Losers</p>
             </div>
             <div className="flex flex-col gap-2">
               {loading
@@ -362,10 +364,10 @@ export default function ExplorePage() {
 
       {/* By Industry */}
       <section className="space-y-8">
-        <p className="text-xs text-white/40 uppercase tracking-wide">By Industry</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide">By Industry</p>
         {INDUSTRIES.map((group) => (
           <div key={group.name}>
-            <p className="text-sm font-medium text-white mb-3">{group.name}</p>
+            <p className="text-sm font-medium text-foreground mb-3">{group.name}</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
               {loading
                 ? group.symbols.map((_, i) => <SkeletonCard key={i} />)
@@ -380,18 +382,18 @@ export default function ExplorePage() {
       </section>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#0D0D0D] border border-white/10 text-white">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Company details</DialogTitle>
-            <DialogDescription>Fundamentals sourced from Yahoo Finance.</DialogDescription>
+            <DialogDescription>Fundamentals sourced from Alpha Vantage.</DialogDescription>
           </DialogHeader>
 
           {detailLoading && (
-            <div className="py-6 text-sm text-white/50">Loading profile…</div>
+            <div className="py-6 text-sm text-muted-foreground">Loading profile…</div>
           )}
 
           {detailError && (
-            <div className="py-4 text-sm text-red-300">{detailError}</div>
+            <div className="py-4 text-sm text-red-500 dark:text-red-300">{detailError}</div>
           )}
 
           {selected && !detailLoading && (
@@ -405,35 +407,35 @@ export default function ExplorePage() {
                   />
                 )}
                 <div>
-                  <p className="text-lg font-semibold">{selected.name}</p>
-                  <p className="text-sm text-white/50">{selected.symbol}</p>
+                  <p className="text-lg font-semibold text-foreground">{selected.name}</p>
+                  <p className="text-sm text-muted-foreground">{selected.symbol}</p>
                 </div>
               </div>
 
               {selected.summary && (
-                <p className="text-sm text-white/70 leading-relaxed">{selected.summary}</p>
+                <p className="text-sm text-foreground/70 leading-relaxed">{selected.summary}</p>
               )}
 
               <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
-                  <p className="text-white/40 text-xs mb-1">Sector</p>
-                  <p>{selected.sector ?? '—'}</p>
+                <div className="p-3 rounded-lg bg-muted border border-border">
+                  <p className="text-muted-foreground text-xs mb-1">Sector</p>
+                  <p className="text-foreground">{selected.sector ?? '—'}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
-                  <p className="text-white/40 text-xs mb-1">Industry</p>
-                  <p>{selected.industry ?? '—'}</p>
+                <div className="p-3 rounded-lg bg-muted border border-border">
+                  <p className="text-muted-foreground text-xs mb-1">Industry</p>
+                  <p className="text-foreground">{selected.industry ?? '—'}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
-                  <p className="text-white/40 text-xs mb-1">Market Cap</p>
-                  <p>{selected.marketCap ? `$${(selected.marketCap / 1e9).toFixed(1)}B` : '—'}</p>
+                <div className="p-3 rounded-lg bg-muted border border-border">
+                  <p className="text-muted-foreground text-xs mb-1">Market Cap</p>
+                  <p className="text-foreground">{selected.marketCap ? `$${(selected.marketCap / 1e9).toFixed(1)}B` : '—'}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
-                  <p className="text-white/40 text-xs mb-1">EPS (TTM)</p>
-                  <p>{selected.eps ?? '—'}</p>
+                <div className="p-3 rounded-lg bg-muted border border-border">
+                  <p className="text-muted-foreground text-xs mb-1">EPS (TTM)</p>
+                  <p className="text-foreground">{selected.eps ?? '—'}</p>
                 </div>
-                <div className="p-3 rounded-lg bg-black/40 border border-white/10">
-                  <p className="text-white/40 text-xs mb-1">P/E (TTM)</p>
-                  <p>{selected.pe ?? '—'}</p>
+                <div className="p-3 rounded-lg bg-muted border border-border">
+                  <p className="text-muted-foreground text-xs mb-1">P/E (TTM)</p>
+                  <p className="text-foreground">{selected.pe ?? '—'}</p>
                 </div>
               </div>
 

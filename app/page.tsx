@@ -1,12 +1,19 @@
+'use client'
+
+import { useState } from 'react'
 import { DashboardMetrics } from '@/components/dashboard-metrics'
 import { TickerList } from '@/components/ticker-list'
 import { Header } from '@/components/header'
 import { AlpacaStatus } from '@/components/alpaca-status'
+import { AuthModal } from '@/components/auth-modal'
 
 export default function Home() {
+  const [authOpen, setAuthOpen] = useState(false)
+
   return (
     <div className="relative min-h-screen w-full bg-[#f7f7f2] text-black dark:bg-[#0b0e12] dark:text-white">
       <Header />
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
 
       <main className="mx-auto flex max-w-6xl flex-col gap-12 px-6 pb-20 pt-28">
         <section className="grid gap-10 md:grid-cols-[1.2fr_0.8fr] md:items-center">
@@ -22,11 +29,17 @@ export default function Home() {
               real-time visibility, and a clean investor experience.
             </p>
             <div className="flex flex-wrap items-center gap-3">
-              <button className="rounded-md bg-black px-5 py-2 text-sm font-semibold text-white dark:bg-white dark:text-black">
+              <button
+                onClick={() => setAuthOpen(true)}
+                className="rounded-md bg-black px-5 py-2 text-sm font-semibold text-white dark:bg-white dark:text-black"
+              >
                 Open Account
               </button>
-              <button className="rounded-md border border-black/15 dark:border-white/20 px-5 py-2 text-sm font-semibold text-black/70 dark:text-white/70">
-                View Pricing
+              <button
+                onClick={() => setAuthOpen(true)}
+                className="rounded-md border border-black/15 dark:border-white/20 px-5 py-2 text-sm font-semibold text-black/70 dark:text-white/70"
+              >
+                Login
               </button>
             </div>
           </div>

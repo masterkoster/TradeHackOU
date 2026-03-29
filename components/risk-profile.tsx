@@ -10,18 +10,20 @@ interface RiskProfileProps {
 }
 
 const SIGNAL_STYLES: Record<NonNullable<Signal>, string> = {
-  BUY: 'bg-green-900/50 border-green-600/50 text-green-300',
-  SELL: 'bg-red-900/50 border-red-600/50 text-red-300',
-  HOLD: 'bg-yellow-900/50 border-yellow-600/50 text-yellow-300',
+  BUY: 'bg-green-100 border-green-500 text-green-700 dark:bg-green-900/50 dark:border-green-600/50 dark:text-green-300',
+  SELL: 'bg-red-100 border-red-500 text-red-700 dark:bg-red-900/50 dark:border-red-600/50 dark:text-red-300',
+  HOLD: 'bg-yellow-100 border-yellow-500 text-yellow-700 dark:bg-yellow-900/50 dark:border-yellow-600/50 dark:text-yellow-300',
 }
 
 export function RiskProfileBadge({ signal, riskProfile, marketOpen, marketLabel }: RiskProfileProps) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-xs text-gray-400 capitalize">{riskProfile} risk</span>
+      <span className="text-xs text-muted-foreground capitalize">{riskProfile} risk</span>
       <span
         className={`px-2 py-0.5 text-[11px] font-semibold uppercase rounded border ${
-          marketOpen ? 'bg-green-900/40 border-green-600/50 text-green-300' : 'bg-gray-800/60 border-gray-600/50 text-gray-300'
+          marketOpen
+            ? 'bg-green-100 border-green-500 text-green-700 dark:bg-green-900/40 dark:border-green-600/50 dark:text-green-300'
+            : 'bg-muted border-border text-muted-foreground'
         }`}
       >
         {marketLabel ?? (marketOpen ? 'Open' : 'Closed')}

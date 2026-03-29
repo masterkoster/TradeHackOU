@@ -39,9 +39,9 @@ function formatVolume(v: number) {
 
 const SENTIMENT_STYLES: Record<string, string> = {
   bullish: 'text-[#22c55e] bg-[#22c55e]/10',
-  bearish: 'text-red-400 bg-red-900/20',
-  neutral: 'text-white/60 bg-white/10',
-  mixed:   'text-yellow-400 bg-yellow-400/10',
+  bearish: 'text-red-500 bg-red-100 dark:text-red-400 dark:bg-red-900/20',
+  neutral: 'text-muted-foreground bg-muted',
+  mixed:   'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-400/10',
 }
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -160,8 +160,8 @@ export default function FavoritesPage() {
   if (favorites.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4 text-center">
-        <Star size={40} className="text-white/10" />
-        <p className="text-white/40 text-sm max-w-xs">
+        <Star size={40} className="text-muted-foreground/30" />
+        <p className="text-muted-foreground text-sm max-w-xs">
           No favorites yet. Click the star icon on any stock to add it here.
         </p>
       </div>
@@ -171,11 +171,11 @@ export default function FavoritesPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-white">Favorites</h1>
+        <h1 className="text-lg font-semibold text-foreground">Favorites</h1>
         <button
           onClick={() => { fetchSnaps(favorites); fetchChartBars(favorites) }}
           disabled={snapsLoading || chartLoading}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-white/60 hover:text-white hover:border-white/20 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted border border-border text-xs text-muted-foreground hover:text-foreground hover:border-foreground/20 disabled:opacity-50 transition-colors"
         >
           <RefreshCw size={12} className={snapsLoading ? 'animate-spin' : ''} />
           Refresh
@@ -183,7 +183,7 @@ export default function FavoritesPage() {
       </div>
 
       {snapsError && (
-        <div className="p-3 rounded-xl bg-red-900/20 border border-red-600/30 text-red-300 text-sm">
+        <div className="p-3 rounded-xl bg-red-50 border border-red-300 text-red-600 text-sm dark:bg-red-900/20 dark:border-red-600/30 dark:text-red-300">
           {snapsError}
         </div>
       )}
@@ -197,33 +197,33 @@ export default function FavoritesPage() {
           return (
             <div
               key={sym}
-              className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10 flex items-center gap-3"
+              className="p-4 rounded-xl bg-card border border-border flex items-center gap-3"
             >
               <span className="w-2 h-8 rounded-full shrink-0" style={{ background: color }} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
-                  <p className="text-sm font-bold text-white">{sym}</p>
+                  <p className="text-sm font-bold text-foreground">{sym}</p>
                   <StarButton symbol={sym} size={12} />
                 </div>
                 {snap ? (
                   <>
-                    <p className="text-base font-semibold text-white">${snap.price.toFixed(2)}</p>
+                    <p className="text-base font-semibold text-foreground">${snap.price.toFixed(2)}</p>
                     <div className="flex items-center gap-1 mt-0.5">
                       {positive
                         ? <TrendingUp size={11} className="text-[#22c55e]" />
-                        : <TrendingDown size={11} className="text-red-400" />}
-                      <span className={`text-xs font-medium ${positive ? 'text-[#22c55e]' : 'text-red-400'}`}>
+                        : <TrendingDown size={11} className="text-red-500 dark:text-red-400" />}
+                      <span className={`text-xs font-medium ${positive ? 'text-[#22c55e]' : 'text-red-500 dark:text-red-400'}`}>
                         {positive ? '+' : ''}{snap.changePct.toFixed(2)}%
                       </span>
                       {snap.volume > 0 && (
-                        <span className="text-xs text-white/30 ml-1">· {formatVolume(snap.volume)}</span>
+                        <span className="text-xs text-muted-foreground ml-1">· {formatVolume(snap.volume)}</span>
                       )}
                     </div>
                   </>
                 ) : snapsLoading ? (
-                  <div className="h-4 w-16 bg-white/10 rounded animate-pulse mt-1" />
+                  <div className="h-4 w-16 bg-muted-foreground/20 rounded animate-pulse mt-1" />
                 ) : (
-                  <p className="text-xs text-white/30">No data</p>
+                  <p className="text-xs text-muted-foreground">No data</p>
                 )}
               </div>
             </div>
@@ -233,8 +233,8 @@ export default function FavoritesPage() {
 
       {/* Compare chart */}
       <div>
-        <p className="text-xs text-white/40 uppercase tracking-wide mb-3">30-Day Performance</p>
-        <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 p-4">
+        <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">30-Day Performance</p>
+        <div className="rounded-2xl bg-card border border-border p-4">
           {/* Legend */}
           {hasChart && (
             <div className="flex gap-4 flex-wrap mb-3">
@@ -253,7 +253,7 @@ export default function FavoritesPage() {
           ) : hasChart ? (
             <CompareChart series={chartSeries} />
           ) : (
-            <div className="h-72 flex items-center justify-center text-white/30 text-sm">
+            <div className="h-72 flex items-center justify-center text-muted-foreground text-sm">
               Chart data unavailable
             </div>
           )}
@@ -263,7 +263,7 @@ export default function FavoritesPage() {
       {/* Portfolio Analysis */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs text-white/40 uppercase tracking-wide">Market Outlook & Plan</p>
+          <p className="text-xs text-muted-foreground uppercase tracking-wide">Market Outlook &amp; Plan</p>
           {analysisStatus !== 'loading' && (
             <button
               onClick={runAnalysis}
@@ -276,27 +276,27 @@ export default function FavoritesPage() {
         </div>
 
         {analysisStatus === 'idle' && (
-          <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 p-6 flex items-center justify-center">
-            <p className="text-sm text-white/30">Click &quot;Analyze Watchlist&quot; to get an AI-generated market outlook based on your favorites.</p>
+          <div className="rounded-2xl bg-card border border-border p-6 flex items-center justify-center">
+            <p className="text-sm text-muted-foreground">Click &quot;Analyze Watchlist&quot; to get an AI-generated market outlook based on your favorites.</p>
           </div>
         )}
 
         {analysisStatus === 'loading' && (
-          <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 p-6 flex items-center justify-center gap-3">
+          <div className="rounded-2xl bg-card border border-border p-6 flex items-center justify-center gap-3">
             <div className="w-5 h-5 border-2 border-[#22c55e] border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm text-white/50">Analyzing your watchlist…</p>
+            <p className="text-sm text-muted-foreground">Analyzing your watchlist…</p>
           </div>
         )}
 
         {analysisStatus === 'error' && (
-          <div className="rounded-2xl bg-red-900/20 border border-red-600/30 p-4 text-red-300 text-sm flex items-center justify-between gap-4">
+          <div className="rounded-2xl bg-red-50 border border-red-300 p-4 text-red-600 text-sm flex items-center justify-between gap-4 dark:bg-red-900/20 dark:border-red-600/30 dark:text-red-300">
             <span>{analysisError}</span>
             <button onClick={runAnalysis} className="underline hover:no-underline shrink-0">Retry</button>
           </div>
         )}
 
         {analysisStatus === 'done' && analysis && (
-          <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 divide-y divide-white/5">
+          <div className="rounded-2xl bg-card border border-border divide-y divide-border">
             {/* Header row */}
             <div className="p-5 flex items-start justify-between gap-4">
               <div className="flex-1">
@@ -305,14 +305,14 @@ export default function FavoritesPage() {
                     {analysis.sentiment}
                   </span>
                 </div>
-                <p className="text-sm text-white leading-relaxed">{analysis.outlook}</p>
+                <p className="text-sm text-foreground leading-relaxed">{analysis.outlook}</p>
               </div>
             </div>
 
             {/* Thesis */}
             <div className="px-5 py-4">
-              <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Your Market Thesis</p>
-              <p className="text-sm text-white/80">{analysis.thesis}</p>
+              <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Your Market Thesis</p>
+              <p className="text-sm text-foreground/80">{analysis.thesis}</p>
             </div>
 
             {/* Strongest / Weakest */}
@@ -320,7 +320,7 @@ export default function FavoritesPage() {
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
                   <TrendingUp size={12} className="text-[#22c55e]" />
-                  <p className="text-xs text-white/40 uppercase tracking-wide">Strongest</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Strongest</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {analysis.strongestPicks.map((sym) => (
@@ -330,12 +330,12 @@ export default function FavoritesPage() {
               </div>
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <TrendingDown size={12} className="text-red-400" />
-                  <p className="text-xs text-white/40 uppercase tracking-wide">Weakest</p>
+                  <TrendingDown size={12} className="text-red-500 dark:text-red-400" />
+                  <p className="text-xs text-muted-foreground uppercase tracking-wide">Weakest</p>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {analysis.weakestPicks.map((sym) => (
-                    <span key={sym} className="text-xs font-semibold px-2 py-0.5 rounded bg-red-900/20 text-red-400">{sym}</span>
+                    <span key={sym} className="text-xs font-semibold px-2 py-0.5 rounded bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400">{sym}</span>
                   ))}
                 </div>
               </div>
@@ -343,16 +343,16 @@ export default function FavoritesPage() {
 
             {/* Concentration risk */}
             <div className="px-5 py-4">
-              <p className="text-xs text-white/40 mb-1 uppercase tracking-wide">Concentration Risk</p>
-              <p className="text-sm text-white/80">{analysis.concentration}</p>
+              <p className="text-xs text-muted-foreground mb-1 uppercase tracking-wide">Concentration Risk</p>
+              <p className="text-sm text-foreground/80">{analysis.concentration}</p>
             </div>
 
             {/* Trading plan */}
             <div className="px-5 py-4">
-              <p className="text-xs text-white/40 mb-2 uppercase tracking-wide">Trading Plan</p>
+              <p className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Trading Plan</p>
               <div className="space-y-1.5">
                 {analysis.plan.split('\n').filter(Boolean).map((line, i) => (
-                  <div key={i} className="flex gap-2 text-sm text-white/80">
+                  <div key={i} className="flex gap-2 text-sm text-foreground/80">
                     <span className="text-[#22c55e] shrink-0">›</span>
                     <span>{line.replace(/^[•\-\d.]+\s*/, '')}</span>
                   </div>
@@ -363,10 +363,10 @@ export default function FavoritesPage() {
             {/* Risk factors */}
             <div className="px-5 py-4">
               <div className="flex items-center gap-1.5 mb-1">
-                <Minus size={12} className="text-yellow-400" />
-                <p className="text-xs text-white/40 uppercase tracking-wide">Key Risks</p>
+                <Minus size={12} className="text-yellow-600 dark:text-yellow-400" />
+                <p className="text-xs text-muted-foreground uppercase tracking-wide">Key Risks</p>
               </div>
-              <p className="text-sm text-white/80">{analysis.risks}</p>
+              <p className="text-sm text-foreground/80">{analysis.risks}</p>
             </div>
           </div>
         )}

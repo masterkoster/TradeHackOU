@@ -61,24 +61,24 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-sm text-white/70">Loading...</p>
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <p className="text-sm text-white/70">Please log in to access the dashboard.</p>
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
+        <p className="text-sm text-muted-foreground">Please log in to access the dashboard.</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-6">
+    <div className="min-h-screen bg-background text-foreground p-6">
       <section id="dashboard" className="scroll-mt-24">
-        <h1 className="text-lg font-semibold text-white mb-6">Dashboard</h1>
+        <h1 className="text-lg font-semibold text-foreground mb-6">Dashboard</h1>
         <TradingDashboard />
       </section>
     </div>

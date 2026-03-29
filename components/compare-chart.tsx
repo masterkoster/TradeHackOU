@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useTheme } from 'next-themes'
 import type { IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts'
 import { ColorType, createChart } from 'lightweight-charts'
 import type { Bar } from '@/types'
@@ -15,30 +16,42 @@ interface CompareChartProps {
   series: StockSeries[]
 }
 
+function getChartColors(isDark: boolean) {
+  return {
+    background: isDark ? '#0D0D0D' : '#ffffff',
+    textColor: isDark ? '#9ca3af' : '#374151',
+    gridColor: isDark ? '#1f2028' : '#e5e7eb',
+    borderColor: isDark ? '#2e303a' : '#d1d5db',
+  }
+}
+
 export function CompareChart({ series }: CompareChartProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const chartRef = useRef<IChartApi | null>(null)
   const linesRef = useRef<ISeriesApi<'Line'>[]>([])
+  const { resolvedTheme } = useTheme()
 
   useEffect(() => {
     if (!containerRef.current) return
 
+    const isDark = document.documentElement.classList.contains('dark')
+    const colors = getChartColors(isDark)
+
     const chart = createChart(containerRef.current, {
       layout: {
-        background: { type: ColorType.Solid, color: '#0D0D0D' },
-        textColor: '#9ca3af',
+        background: { type: ColorType.Solid, color: colors.background },
+        textColor: colors.textColor,
       },
       grid: {
-        vertLines: { color: '#1f2028' },
-        horzLines: { color: '#1f2028' },
+        vertLines: { color: colors.gridColor },
+        horzLines: { color: colors.gridColor },
       },
       crosshair: { mode: 1 },
       rightPriceScale: {
-        borderColor: '#2e303a',
-        // format as percent change e.g. +4.20%
+        borderColor: colors.borderColor,
         scaleMargins: { top: 0.1, bottom: 0.1 },
       },
-      timeScale: { borderColor: '#2e303a', timeVisible: true, secondsVisible: false },
+      timeScale: { borderColor: colors.borderColor, timeVisible: true, secondsVisible: false },
       width: containerRef.current.clientWidth,
       height: 360,
       localization: {
@@ -62,6 +75,25 @@ export function CompareChart({ series }: CompareChartProps) {
       linesRef.current = []
     }
   }, [])
+
+  // Update chart colors when theme changes
+  useEffect(() => {
+    if (!chartRef.current) return
+    const isDark = resolvedTheme === 'dark'
+    const colors = getChartColors(isDark)
+    chartRef.current.applyOptions({
+      layout: {
+        background: { type: ColorType.Solid, color: colors.background },
+        textColor: colors.textColor,
+      },
+      grid: {
+        vertLines: { color: colors.gridColor },
+        horzLines: { color: colors.gridColor },
+      },
+      rightPriceScale: { borderColor: colors.borderColor },
+      timeScale: { borderColor: colors.borderColor, timeVisible: true, secondsVisible: false },
+    })
+  }, [resolvedTheme])
 
   useEffect(() => {
     const chart = chartRef.current

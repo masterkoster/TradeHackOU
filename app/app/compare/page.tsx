@@ -150,7 +150,7 @@ export default function ComparePage() {
 
   return (
     <div>
-      <h1 className="text-lg font-semibold text-white mb-5">Compare</h1>
+      <h1 className="text-lg font-semibold text-foreground mb-5">Compare</h1>
 
       <div className="flex flex-col gap-2 mb-5">
         {stocks.map((stock) => (
@@ -162,7 +162,7 @@ export default function ComparePage() {
               onChange={(e) => setInputs((prev) => ({ ...prev, [stock.id]: e.target.value.toUpperCase() }))}
               onKeyDown={(e) => e.key === 'Enter' && loadStock(stock.id, inputs[stock.id] ?? '')}
               placeholder="Symbol…"
-              className="w-24 px-2.5 py-1.5 rounded-lg bg-black border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-white/20"
+              className="w-24 px-2.5 py-1.5 rounded-lg bg-card border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-foreground/20"
             />
 
             <button
@@ -182,12 +182,12 @@ export default function ComparePage() {
                 <StarButton symbol={stock.symbol} size={12} />
               </div>
             )}
-            {stock.error && <span className="text-xs text-red-400">{stock.error}</span>}
+            {stock.error && <span className="text-xs text-red-500 dark:text-red-400">{stock.error}</span>}
 
             {stocks.length > 1 && (
               <button
                 onClick={() => removeStock(stock.id)}
-                className="ml-auto text-white/20 hover:text-white/50 transition-colors text-lg leading-none shrink-0"
+                className="ml-auto text-muted-foreground/40 hover:text-muted-foreground transition-colors text-lg leading-none shrink-0"
                 aria-label="Remove"
               >
                 ×
@@ -199,7 +199,7 @@ export default function ComparePage() {
         {stocks.length < COLORS.length && (
           <button
             onClick={addStock}
-            className="self-start mt-1 px-3 py-1.5 rounded-lg border border-white/10 text-white/40 hover:text-white/70 hover:border-white/20 text-xs transition-colors"
+            className="self-start mt-1 px-3 py-1.5 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 text-xs transition-colors"
           >
             + Add stock
           </button>
@@ -213,8 +213,8 @@ export default function ComparePage() {
             onClick={() => changePeriod(p)}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               period.key === p.key
-                ? 'bg-white/10 text-white'
-                : 'text-white/30 hover:text-white/60'
+                ? 'bg-foreground/10 text-foreground'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             {p.label}
@@ -235,22 +235,22 @@ export default function ComparePage() {
         </div>
       )}
 
-      <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 p-4 mb-6">
+      <div className="rounded-2xl bg-card border border-border p-4 mb-6">
         {hasData ? (
           <CompareChart series={chartSeries} />
         ) : (
-          <div className="h-72 flex items-center justify-center text-white/30 text-sm">
+          <div className="h-72 flex items-center justify-center text-muted-foreground text-sm">
             Load at least one symbol to see the chart
           </div>
         )}
       </div>
 
       {hasData && (
-        <div className="rounded-2xl bg-[#0D0D0D] border border-white/10 overflow-hidden">
+        <div className="rounded-2xl bg-card border border-border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left px-4 py-3 text-white/40 font-normal">Metric</th>
+              <tr className="border-b border-border">
+                <th className="text-left px-4 py-3 text-muted-foreground font-normal">Metric</th>
                 {stocks.map((s) => (
                   <th key={s.id} className="text-right px-4 py-3 font-semibold" style={{ color: s.color }}>
                     {s.symbol || '—'}
@@ -262,11 +262,11 @@ export default function ComparePage() {
               {TABLE_ROWS.map((row, i) => (
                 <tr
                   key={row.key}
-                  className={`border-b border-white/5 ${i % 2 !== 0 ? 'bg-white/[0.02]' : ''}`}
+                  className={`border-b border-border/50 ${i % 2 !== 0 ? 'bg-muted/30' : ''}`}
                 >
-                  <td className="px-4 py-3 text-white/50">{row.label}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{row.label}</td>
                   {stocks.map((s) => (
-                    <td key={s.id} className="px-4 py-3 text-right text-white tabular-nums">
+                    <td key={s.id} className="px-4 py-3 text-right text-foreground tabular-nums">
                       {getCell(row.key, s.bars)}
                     </td>
                   ))}

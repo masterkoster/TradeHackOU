@@ -1,7 +1,7 @@
 const rows = [
   {
     title: 'Low-cost execution',
-    detail: 'Keep fees tight with competitive routing and spreads.',
+    detail: 'Zero platform fees. Keep more of what you earn.',
   },
   {
     title: 'Portfolio visibility',

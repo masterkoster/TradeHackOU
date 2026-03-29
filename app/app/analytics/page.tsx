@@ -102,14 +102,14 @@ export default function AnalyticsPage() {
   }, [analysis, symbol, timeframe])
 
   const signalColors: Record<NonNullable<Signal>, string> = {
-    BUY: 'bg-green-900/40 border-green-600/50 text-green-300',
-    SELL: 'bg-red-900/40 border-red-600/50 text-red-300',
-    HOLD: 'bg-yellow-900/40 border-yellow-600/50 text-yellow-300',
+    BUY: 'bg-green-100 border-green-500 text-green-700 dark:bg-green-900/40 dark:border-green-600/50 dark:text-green-300',
+    SELL: 'bg-red-100 border-red-500 text-red-700 dark:bg-red-900/40 dark:border-red-600/50 dark:text-red-300',
+    HOLD: 'bg-yellow-100 border-yellow-500 text-yellow-700 dark:bg-yellow-900/40 dark:border-yellow-600/50 dark:text-yellow-300',
   }
 
   return (
     <div className="max-w-4xl">
-      <h1 className="text-lg font-semibold text-white mb-6">Analytics</h1>
+      <h1 className="text-lg font-semibold text-foreground mb-6">Analytics</h1>
 
       {/* Quick-pick watchlist */}
       <div className="flex flex-wrap gap-2 mb-6">
@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
               symbol === t
                 ? 'bg-[#22c55e]/10 border-[#22c55e]/50 text-[#22c55e]'
-                : 'bg-white/5 border-white/10 text-white/60 hover:text-white hover:border-white/30'
+                : 'bg-muted border-border text-muted-foreground hover:text-foreground hover:border-foreground/30'
             }`}
           >
             {t}
@@ -135,7 +135,7 @@ export default function AnalyticsPage() {
           onChange={(e) => setInput(e.target.value.toUpperCase())}
           onKeyDown={(e) => e.key === 'Enter' && handleAnalyze(input)}
           placeholder="Enter symbol…"
-          className="flex-1 max-w-xs px-3 py-2 rounded-lg bg-[#0D0D0D] border border-white/10 text-white text-sm placeholder:text-white/30 focus:outline-none focus:border-[#22c55e]/50"
+          className="flex-1 max-w-xs px-3 py-2 rounded-lg bg-card border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:border-[#22c55e]/50"
         />
         <button
           onClick={() => handleAnalyze(input)}
@@ -149,23 +149,23 @@ export default function AnalyticsPage() {
       {/* Sentiment + signal summary */}
       {sentiment && (
         <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10">
-            <p className="text-xs text-white/40 mb-1">Symbol</p>
-            <p className="text-2xl font-bold text-white">{symbol}</p>
+          <div className="p-4 rounded-xl bg-card border border-border">
+            <p className="text-xs text-muted-foreground mb-1">Symbol</p>
+            <p className="text-2xl font-bold text-foreground">{symbol}</p>
           </div>
-          <div className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10">
-            <p className="text-xs text-white/40 mb-1">Sentiment</p>
-            <p className="text-2xl font-bold capitalize text-white">{sentiment.label}</p>
-            <p className="text-xs text-white/40 mt-1">{sentiment.score.toFixed(1)}% confidence</p>
+          <div className="p-4 rounded-xl bg-card border border-border">
+            <p className="text-xs text-muted-foreground mb-1">Sentiment</p>
+            <p className="text-2xl font-bold capitalize text-foreground">{sentiment.label}</p>
+            <p className="text-xs text-muted-foreground mt-1">{sentiment.score.toFixed(1)}% confidence</p>
           </div>
-          <div className="p-4 rounded-xl bg-[#0D0D0D] border border-white/10">
-            <p className="text-xs text-white/40 mb-2">Signal</p>
+          <div className="p-4 rounded-xl bg-card border border-border">
+            <p className="text-xs text-muted-foreground mb-2">Signal</p>
             {signal ? (
               <span className={`px-3 py-1 rounded border text-sm font-bold ${signalColors[signal]}`}>
                 {signal}
               </span>
             ) : (
-              <span className="text-white/30 text-sm">—</span>
+              <span className="text-muted-foreground text-sm">—</span>
             )}
           </div>
         </div>
@@ -173,11 +173,11 @@ export default function AnalyticsPage() {
 
       {/* Recent headlines */}
       {headlines.length > 0 && (
-        <div className="mb-8 p-4 rounded-xl bg-[#0D0D0D] border border-white/10">
-          <p className="text-xs text-white/40 uppercase tracking-wide mb-3">Recent Headlines</p>
+        <div className="mb-8 p-4 rounded-xl bg-card border border-border">
+          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-3">Recent Headlines</p>
           <ul className="flex flex-col gap-2">
             {headlines.map((h, i) => (
-              <li key={i} className="text-sm text-white/70 leading-snug border-l-2 border-white/10 pl-3">
+              <li key={i} className="text-sm text-foreground/70 leading-snug border-l-2 border-border pl-3">
                 {h}
               </li>
             ))}

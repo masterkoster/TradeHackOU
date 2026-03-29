@@ -33,25 +33,25 @@ export function Header() {
   }
 
   return (
-    <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-5 bg-white/70 dark:bg-black/70 backdrop-blur-sm border-b border-black/10 dark:border-white/10">
-      <div className="flex items-center gap-10">
-        <FinbroLogo className="text-black dark:text-white h-7 w-auto" />
-        <nav className="hidden md:flex items-center gap-6 text-sm text-black/70 dark:text-white/70">
+    <header className="absolute top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-black/80 backdrop-blur-sm border-b border-black/10 dark:border-white/10">
+      <div className="flex items-center gap-8 min-w-0">
+        <FinbroLogo className="text-black dark:text-white h-8 w-auto shrink-0" />
+        <nav className="hidden lg:flex items-center gap-6 text-[15px] text-black/60 dark:text-white/60">
           {navItems.map((item) => (
-            <button key={item} className="hover:text-black dark:hover:text-white transition-colors">
+            <button key={item} className="hover:text-black dark:hover:text-white transition-colors whitespace-nowrap">
               {item}
             </button>
           ))}
         </nav>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         <ThemeToggle />
         {authed ? (
           <div className="relative">
             <Button
               variant="ghost"
-              className="text-black dark:text-white"
+              className="text-black dark:text-white text-[15px]"
               onClick={() => setMenuOpen((prev) => !prev)}
             >
               Profile
@@ -69,10 +69,17 @@ export function Header() {
           </div>
         ) : (
           <>
-            <Button variant="ghost" className="text-black dark:text-white" onClick={() => setOpen(true)}>
+            <Button
+              variant="ghost"
+              className="text-black dark:text-white text-[15px] whitespace-nowrap"
+              onClick={() => setOpen(true)}
+            >
               Login
             </Button>
-            <Button className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black" onClick={() => setOpen(true)}>
+            <Button
+              className="bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black text-[15px] whitespace-nowrap"
+              onClick={() => setOpen(true)}
+            >
               Open Account
             </Button>
           </>

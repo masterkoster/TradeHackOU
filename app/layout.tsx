@@ -7,9 +7,9 @@ import './globals.css'
 const spaceGrotesk = Space_Grotesk({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'TradeHackOU',
-  description: 'Hackathon trading dashboard',
-  generator: 'TradeHackOU',
+  title: 'Yeildra',
+  description: 'Yeildra trading dashboard',
+  generator: 'Yeildra',
   icons: {
     icon: [
       {
