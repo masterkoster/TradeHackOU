@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { Bar, WSStatus } from '@/types'
 
 const WS_URL = 'wss://stream.data.alpaca.markets/v2/iex'
+const DEFAULT_FEED = 'iex'
 
 export function useWebSocket(onBar: (bar: Bar) => void) {
   const [status, setStatus] = useState<WSStatus>('disconnected')
@@ -43,7 +44,7 @@ export function useWebSocket(onBar: (bar: Bar) => void) {
         }
         if (msg['T'] === 'success' && msg['msg'] === 'authenticated') {
           setStatus('authenticated')
-          ws.send(JSON.stringify({ action: 'subscribe', bars: [symbolRef.current] }))
+          ws.send(JSON.stringify({ action: 'subscribe', bars: [symbolRef.current], feed: DEFAULT_FEED }))
         } else if (msg['T'] === 'b' && msg['S'] === symbolRef.current) {
           const bar: Bar = {
             time: Math.floor(new Date(msg['t'] as string).getTime() / 1000),

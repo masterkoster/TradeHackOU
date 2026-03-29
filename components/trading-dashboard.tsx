@@ -154,8 +154,6 @@ export function TradingDashboard() {
 
     wsDisconnect()
     wsConnect(sym)
-    wsDisconnect()
-    wsConnect(sym)
   }, [pendingSymbol, timeframe, riskProfile, load, resetGroq, wsConnect, wsDisconnect, fetchMarketStatus])
 
   const handleRunGroq = useCallback(async () => {
