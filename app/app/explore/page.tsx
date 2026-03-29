@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { TradingViewMarketOverview, TradingViewSymbolOverview } from '@/components/tradingview-widgets'
 import { StarButton } from '@/components/star-button'
 
 const COMPANY_NAMES: Record<string, string> = {
@@ -328,6 +329,11 @@ export default function ExplorePage() {
         </div>
       )}
 
+      <section className="rounded-2xl border border-white/10 bg-[#0D0D0D] p-4">
+        <p className="text-xs text-white/40 uppercase tracking-wide mb-4">Market Overview</p>
+        <TradingViewMarketOverview />
+      </section>
+
       {/* Today's Movers */}
       <section>
         <p className="text-xs text-white/40 uppercase tracking-wide mb-4">Today&apos;s Movers</p>
@@ -380,7 +386,7 @@ export default function ExplorePage() {
       </section>
 
       <Dialog open={detailOpen} onOpenChange={setDetailOpen}>
-        <DialogContent className="max-w-2xl bg-[#0D0D0D] border border-white/10 text-white">
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto bg-[#0D0D0D] border border-white/10 text-white">
           <DialogHeader>
             <DialogTitle>Company details</DialogTitle>
             <DialogDescription>Fundamentals sourced from Yahoo Finance.</DialogDescription>
@@ -499,6 +505,11 @@ export default function ExplorePage() {
                     <p className="text-xs text-white/40">No data available.</p>
                   )}
                 </div>
+              </div>
+
+              <div className="rounded-lg border border-white/10 bg-black/30 p-3">
+                <p className="text-xs text-white/40 uppercase tracking-wide mb-3">Chart</p>
+                <TradingViewSymbolOverview symbol={selected.symbol} />
               </div>
             </div>
           )}
